@@ -1,34 +1,34 @@
 <template>
   <div class="space-y-6">
     <div>
-      <h2 class="text-xl font-semibold text-gray-900 mb-4">步骤 3: 效果预览</h2>
-      <p class="text-gray-600 mb-6">预览您的自定义配置在实际设备上的效果。</p>
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">Bước 3: Xem trước hiệu ứng</h2>
+      <p class="text-gray-600 mb-6">Xem trước cấu hình tùy chỉnh của bạn trên thiết bị thực tế.</p>
     </div>
 
-    <!-- 设备预览区域 -->
+    <!-- Khu vực xem trước thiết bị -->
     <div class="flex flex-col lg:flex-row gap-8">
-      <!-- 设备模拟器 -->
+      <!-- Trình mô phỏng thiết bị -->
       <div class="flex-1">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">设备预览 (1:1 像素比例)</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Xem trước thiết bị (Tỷ lệ pixel 1:1)</h3>
         <div class="bg-gray-100 p-4 rounded-lg">
           <div class="max-w-full overflow-auto flex justify-center">
-            <!-- 设备外框 -->
+            <!-- Khung thiết bị -->
             <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl inline-block">
               <div class="bg-gray-900 p-2 rounded-xl">
-                <!-- 屏幕区域 -->
+                <!-- Vùng màn hình -->
                 <div 
                   :style="getScreenStyle()"
                   class="relative rounded-lg overflow-hidden border-2 border-gray-700 flex flex-col items-center justify-center"
                 >
-                <!-- 背景层 -->
+                <!-- Lớp nền -->
                 <div 
                   :style="getBackgroundStyle()"
                   class="absolute inset-0"
                 ></div>
                 
-                <!-- 内容层 -->
+                <!-- Lớp nội dung -->
                 <div class="relative z-10 flex flex-col items-center justify-center p-4 text-center">
-                  <!-- 表情显示 -->
+                  <!-- Hiển thị biểu tượng cảm xúc -->
                   <div class="mb-4">
                     <div v-if="currentEmoji && availableEmotions.length > 0" class="emoji-container">
                       <img 
@@ -53,19 +53,19 @@
                       >
                         <div class="text-center">
                           <div class="text-sm">😕</div>
-                          <div class="text-xs">未配置表情</div>
+                          <div class="text-xs">Chưa cấu hình biểu tượng</div>
                         </div>
                       </div>
                     </div>
                   </div>
                   
-                  <!-- 文字显示 -->
+                  <!-- Hiển thị văn bản -->
                   <div 
                     :style="getTextStyle()"
                     class="text-message max-w-full break-words relative"
                   >
                     <div v-if="!fontLoaded" class="absolute inset-0 flex items-center justify-center">
-                      <div class="animate-pulse text-gray-400 text-xs">字体加载中...</div>
+                      <div class="animate-pulse text-gray-400 text-xs">Đang tải font chữ...</div>
                     </div>
                     <div :class="{ 'opacity-0': !fontLoaded }">
                       {{ previewText }}
@@ -75,7 +75,7 @@
               </div>
             </div>
             
-            <!-- 设备信息 -->
+            <!-- Thông tin thiết bị -->
             <div class="mt-3 text-center text-xs text-gray-400">
               {{ config.chip.display.width }} × {{ config.chip.display.height }}
               {{ config.chip.model.toUpperCase() }}
@@ -85,25 +85,25 @@
         </div>
       </div>
 
-      <!-- 控制面板 -->
+      <!-- Bảng điều khiển -->
       <div class="w-full lg:w-80">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">预览设置</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Cài đặt xem trước</h3>
         <div class="space-y-6 bg-white border border-gray-200 rounded-lg p-4">
           
-          <!-- 文字内容编辑 -->
+          <!-- Chỉnh sửa nội dung văn bản -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">预览文字</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Văn bản xem trước</label>
             <textarea
               v-model="previewText"
               class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               rows="3"
-              placeholder="Hi，我是你的好朋友小智！"
+              placeholder="Xin chào, tôi là người bạn tốt của bạn Tiểu Trí!"
             ></textarea>
           </div>
 
-          <!-- 表情切换 -->
+          <!-- Chuyển đổi biểu tượng cảm xúc -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">当前表情</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Biểu tượng cảm xúc hiện tại</label>
             <div v-if="availableEmotions.length > 0" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto justify-center">
               <button
                 v-for="emotion in availableEmotions"
@@ -131,13 +131,13 @@
             </div>
             <div v-else class="text-center py-4 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed">
               <div class="text-2xl mb-2">😕</div>
-              <div class="text-sm">请先在主题设计中配置表情包</div>
+              <div class="text-sm">Vui lòng cấu hình gói biểu tượng trong thiết kế giao diện trước</div>
             </div>
           </div>
 
-          <!-- 主题模式切换 -->
+          <!-- Chuyển đổi chế độ giao diện -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">主题模式</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Chế độ giao diện</label>
             <div class="flex space-x-2">
               <button
                 @click="themeMode = 'light'"
@@ -148,7 +148,7 @@
                     : 'border-gray-300 hover:border-gray-400'
                 ]"
               >
-                🌞 浅色
+                🌞 Sáng
               </button>
               <button
                 @click="themeMode = 'dark'"
@@ -159,37 +159,37 @@
                     : 'border-gray-300 hover:border-gray-400'
                 ]"
               >
-                🌙 深色
+                🌙 Tối
               </button>
             </div>
           </div>
 
 
-          <!-- 配置摘要 -->
+          <!-- Tóm tắt cấu hình -->
           <div class="border-t pt-4">
-            <h4 class="font-medium text-gray-900 mb-2">配置摘要</h4>
+            <h4 class="font-medium text-gray-900 mb-2">Tóm tắt cấu hình</h4>
             <div class="text-xs text-gray-600 space-y-1">
-              <div v-if="config.theme.wakeword">唤醒词: {{ getWakewordName() }}</div>
+              <div v-if="config.theme.wakeword">Từ đánh thức: {{ getWakewordName() }}</div>
               <div class="flex items-center">
-                <span>字体: {{ getFontName() }}</span>
-                <span v-if="!fontLoaded" class="ml-2 animate-pulse text-blue-500">加载中...</span>
+                <span>Font chữ: {{ getFontName() }}</span>
+                <span v-if="!fontLoaded" class="ml-2 animate-pulse text-blue-500">Đang tải...</span>
                 <span v-else class="ml-2 text-green-500">✓</span>
               </div>
-              <div>表情: {{ getEmojiName() }}</div>
-              <div>皮肤: {{ getSkinName() }}</div>
+              <div>Biểu tượng: {{ getEmojiName() }}</div>
+              <div>Giao diện: {{ getSkinName() }}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 操作按钮 -->
+    <!-- Nút thao tác -->
     <div class="flex justify-between">
       <button 
         @click="$emit('prev')"
         class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
       >
-        上一步
+        Bước trước
       </button>
       <button 
         @click="$emit('generate')"
@@ -198,7 +198,7 @@
         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
         </svg>
-        生成 assets.bin
+        Tạo assets.bin
       </button>
     </div>
   </div>
@@ -216,66 +216,66 @@ const props = defineProps({
 
 defineEmits(['prev', 'generate'])
 
-// 预览状态
-const previewText = ref('Hi，我是你的好朋友小智！')
+// Trạng thái xem trước
+const previewText = ref('Xin chào, tôi là người bạn tốt của bạn Tiểu Trí!')
 const currentEmoji = ref('happy')
 const themeMode = ref('light')
 const fontLoaded = ref(false)
 const loadedFontFamily = ref('')
 
-// 表情数据
+// Dữ liệu biểu tượng cảm xúc
 const emotionList = [
-  { key: 'neutral', name: '默认', emoji: '😶' },
-  { key: 'happy', name: '开心', emoji: '🙂' },
-  { key: 'laughing', name: '大笑', emoji: '😆' },
-  { key: 'funny', name: '搞笑', emoji: '😂' },
-  { key: 'sad', name: '伤心', emoji: '😔' },
-  { key: 'angry', name: '生气', emoji: '😠' },
-  { key: 'crying', name: '哭泣', emoji: '😭' },
-  { key: 'loving', name: '喜爱', emoji: '😍' },
-  { key: 'surprised', name: '惊讶', emoji: '😯' },
-  { key: 'thinking', name: '思考', emoji: '🤔' },
-  { key: 'cool', name: '酷炫', emoji: '😎' },
-  { key: 'sleepy', name: '困倦', emoji: '😴' }
+  { key: 'neutral', name: 'Mặc định', emoji: '😶' },
+  { key: 'happy', name: 'Vui vẻ', emoji: '🙂' },
+  { key: 'laughing', name: 'Cười lớn', emoji: '😆' },
+  { key: 'funny', name: 'Hài hước', emoji: '😂' },
+  { key: 'sad', name: 'Buồn bã', emoji: '😔' },
+  { key: 'angry', name: 'Tức giận', emoji: '😠' },
+  { key: 'crying', name: 'Khóc', emoji: '😭' },
+  { key: 'loving', name: 'Yêu thích', emoji: '😍' },
+  { key: 'surprised', name: 'Ngạc nhiên', emoji: '😯' },
+  { key: 'thinking', name: 'Suy nghĩ', emoji: '🤔' },
+  { key: 'cool', name: 'Ngầu', emoji: '😎' },
+  { key: 'sleepy', name: 'Buồn ngủ', emoji: '😴' }
 ]
 
-// 可用的表情列表
+// Danh sách biểu tượng cảm xúc khả dụng
 const availableEmotions = computed(() => {
   if (props.config.theme.emoji.type === 'preset' && props.config.theme.emoji.preset) {
     return emotionList
   } else if (props.config.theme.emoji.type === 'custom') {
-    // 只显示用户上传的表情
+    // Chỉ hiển thị biểu tượng do người dùng tải lên
     const customImages = props.config.theme.emoji.custom.images
     return emotionList.filter(emotion => customImages[emotion.key])
   } else {
-    // 未配置表情时返回空数组
+    // Trả về mảng rỗng khi chưa cấu hình biểu tượng
     return []
   }
 })
 
-// 当前表情图片
+// Hình ảnh biểu tượng cảm xúc hiện tại
 const currentEmojiImage = computed(() => {
   return getEmotionImage(currentEmoji.value)
 })
 
-// 获取屏幕样式
+// Lấy kiểu màn hình
 const getScreenStyle = () => {
   const { width, height } = props.config.chip.display
   
-  // 使用1:1像素比例，直接使用配置中的尺寸
+  // Sử dụng tỷ lệ pixel 1:1, trực tiếp sử dụng kích thước trong cấu hình
   return {
     width: `${width}px`,
     height: `${height}px`
   }
 }
 
-// 获取背景样式
+// Lấy kiểu nền
 const getBackgroundStyle = () => {
   const bg = props.config.theme.skin[themeMode.value]
   
   if (bg.backgroundType === 'image' && bg.backgroundImage) {
     try {
-      // 验证背景图片文件是否有效
+      // Xác minh tệp hình nền có hợp lệ không
       if (bg.backgroundImage && typeof bg.backgroundImage === 'object' && bg.backgroundImage.size) {
         return {
           backgroundImage: `url(${URL.createObjectURL(bg.backgroundImage)})`,
@@ -284,7 +284,7 @@ const getBackgroundStyle = () => {
         }
       }
     } catch (error) {
-      console.warn('背景图片预览加载失败:', error)
+      console.warn('Tải xem trước hình nền thất bại:', error)
     }
   }
   
@@ -293,9 +293,9 @@ const getBackgroundStyle = () => {
   }
 }
 
-// 获取表情样式
+// Lấy kiểu biểu tượng cảm xúc
 const getEmojiStyle = () => {
-  let size = 48 // 默认大小
+  let size = 48 // Kích thước mặc định
   
   if (props.config.theme.emoji.type === 'preset') {
     size = props.config.theme.emoji.preset === 'twemoji64' ? 64 : 32
@@ -303,18 +303,18 @@ const getEmojiStyle = () => {
     size = Math.min(props.config.theme.emoji.custom.size.width, props.config.theme.emoji.custom.size.height)
   }
   
-  // 使用1:1像素比例，直接使用配置中的表情尺寸
+  // Sử dụng tỷ lệ pixel 1:1, trực tiếp sử dụng kích thước biểu tượng trong cấu hình
   return {
     width: `${size}px`,
     height: `${size}px`
   }
 }
 
-// 获取文字样式
+// Lấy kiểu văn bản
 const getTextStyle = () => {
   let fontSize = 14
   
-  // 根据字体配置调整字号
+  // Điều chỉnh cỡ chữ theo cấu hình font
   if (props.config.theme.font.type === 'preset') {
     const fontConfig = props.config.theme.font.preset
     if (fontConfig.includes('_14_')) fontSize = 14
@@ -325,7 +325,7 @@ const getTextStyle = () => {
     fontSize = props.config.theme.font.custom.size
   }
   
-  // 使用1:1像素比例，直接使用配置中的字体大小
+  // Sử dụng tỷ lệ pixel 1:1, trực tiếp sử dụng kích thước font trong cấu hình
   const textColor = themeMode.value === 'dark' 
     ? props.config.theme.skin.dark.textColor 
     : props.config.theme.skin.light.textColor
@@ -338,9 +338,9 @@ const getTextStyle = () => {
   }
 }
 
-// 动态加载字体
+// Tải font động
 const loadFont = async () => {
-  // 清理之前的字体
+  // Dọn dẹp font trước đó
   const existingStyles = document.querySelectorAll('style[data-font-preview]')
   existingStyles.forEach(style => style.remove())
   
@@ -349,7 +349,7 @@ const loadFont = async () => {
 
   try {
     if (props.config.theme.font.type === 'preset') {
-      // 加载预设字体
+      // Tải font có sẵn
       const fontFamily = 'PuHuiPreview'
       const fontUrl = './static/fonts/puhui_deepseek.ttf'
       
@@ -364,19 +364,19 @@ const loadFont = async () => {
       `
       document.head.appendChild(style)
       
-      // 等待字体加载完成
+      // Đợi font tải xong
       await document.fonts.load(`16px "${fontFamily}"`)
       loadedFontFamily.value = fontFamily
       fontLoaded.value = true
       
     } else if (props.config.theme.font.custom.file) {
-      // 加载自定义字体
+      // Tải font tùy chỉnh
       try {
         const fontFile = props.config.theme.font.custom.file
         
-        // 验证文件对象是否有效
+        // Xác minh đối tượng tệp có hợp lệ không
         if (!fontFile || typeof fontFile !== 'object' || !fontFile.size) {
-          throw new Error('字体文件对象无效')
+          throw new Error('Đối tượng tệp font không hợp lệ')
         }
         
         const fontFamily = 'CustomFontPreview'
@@ -393,29 +393,29 @@ const loadFont = async () => {
         `
         document.head.appendChild(style)
         
-        // 等待字体加载完成
+        // Đợi font tải xong
         await document.fonts.load(`16px "${fontFamily}"`)
         loadedFontFamily.value = fontFamily
         fontLoaded.value = true
       } catch (error) {
-        console.warn('自定义字体预览加载失败:', error)
-        // 使用系统默认字体作为fallback
+        console.warn('Tải xem trước font tùy chỉnh thất bại:', error)
+        // Sử dụng font mặc định của hệ thống làm dự phòng
         loadedFontFamily.value = 'Arial, sans-serif'
         fontLoaded.value = true
       }
     } else {
-      // 使用系统字体
+      // Sử dụng font hệ thống
       loadedFontFamily.value = 'system-ui'
       fontLoaded.value = true
     }
   } catch (error) {
-    console.warn('Font loading failed:', error)
+    console.warn('Tải font thất bại:', error)
     loadedFontFamily.value = 'system-ui'
     fontLoaded.value = true
   }
 }
 
-// 获取字体族
+// Lấy họ font
 const getFontFamily = () => {
   if (fontLoaded.value && loadedFontFamily.value) {
     return `"${loadedFontFamily.value}", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif`
@@ -423,7 +423,7 @@ const getFontFamily = () => {
   return '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
 }
 
-// 获取表情图片
+// Lấy hình ảnh biểu tượng cảm xúc
 const getEmotionImage = (emotionKey) => {
   if (props.config.theme.emoji.type === 'preset') {
     const size = props.config.theme.emoji.preset === 'twemoji64' ? '64' : '32'
@@ -431,56 +431,56 @@ const getEmotionImage = (emotionKey) => {
   } else if (props.config.theme.emoji.type === 'custom' && props.config.theme.emoji.custom.images[emotionKey]) {
     try {
       const emojiFile = props.config.theme.emoji.custom.images[emotionKey]
-      // 验证表情文件是否有效
+      // Xác minh tệp biểu tượng có hợp lệ không
       if (emojiFile && typeof emojiFile === 'object' && emojiFile.size) {
         return URL.createObjectURL(emojiFile)
       }
     } catch (error) {
-      console.warn(`表情图片预览加载失败 (${emotionKey}):`, error)
+      console.warn(`Tải xem trước hình biểu tượng thất bại (${emotionKey}):`, error)
     }
   }
   return null
 }
 
-// 获取表情字符
+// Lấy ký tự biểu tượng cảm xúc
 const getEmojiCharacter = (emotionKey) => {
   const emotion = emotionList.find(e => e.key === emotionKey)
   return emotion ? emotion.emoji : '😶'
 }
 
-// 获取表情控制按钮尺寸
+// Lấy kích thước nút điều khiển biểu tượng cảm xúc
 const getEmojiControlSize = () => {
   if (props.config.theme.emoji.type === 'preset') {
     const baseSize = props.config.theme.emoji.preset === 'twemoji64' ? 64 : 32
-    return baseSize + 16 // 加上padding
+    return baseSize + 16 // Thêm padding
   } else if (props.config.theme.emoji.custom.size) {
     const baseSize = Math.min(props.config.theme.emoji.custom.size.width, props.config.theme.emoji.custom.size.height)
-    return Math.min(baseSize + 16, 64) // 限制最大尺寸
+    return Math.min(baseSize + 16, 64) // Giới hạn kích thước tối đa
   }
-  return 48 // 默认尺寸
+  return 48 // Kích thước mặc định
 }
 
-// 获取表情图片显示尺寸
+// Lấy kích thước hiển thị hình biểu tượng cảm xúc
 const getEmojiDisplaySize = () => {
   if (props.config.theme.emoji.type === 'preset') {
     return props.config.theme.emoji.preset === 'twemoji64' ? 64 : 32
   } else if (props.config.theme.emoji.custom.size) {
     return Math.min(props.config.theme.emoji.custom.size.width, props.config.theme.emoji.custom.size.height, 48)
   }
-  return 32 // 默认尺寸
+  return 32 // Kích thước mặc định
 }
 
-// 切换表情
+// Chuyển đổi biểu tượng cảm xúc
 const changeEmotion = (emotionKey) => {
   currentEmoji.value = emotionKey
 }
 
 
-// 配置摘要方法
+// Phương thức tóm tắt cấu hình
 const getWakewordName = () => {
   const names = {
-    'wn9s_hilexin': 'Hi,乐鑫', 'wn9s_hiesp': 'Hi,ESP', 'wn9s_nihaoxiaozhi': '你好小智',
-    'wn9_nihaoxiaozhi_tts': '你好小智', 'wn9_alexa': 'Alexa', 'wn9_jarvis_tts': 'Jarvis'
+    'wn9s_hilexin': 'Hi,Lexin', 'wn9s_hiesp': 'Hi,ESP', 'wn9s_nihaoxiaozhi': 'Xin chào Tiểu Trí',
+    'wn9_nihaoxiaozhi_tts': 'Xin chào Tiểu Trí', 'wn9_alexa': 'Alexa', 'wn9_jarvis_tts': 'Jarvis'
   }
   return names[props.config.theme.wakeword] || props.config.theme.wakeword
 }
@@ -488,15 +488,15 @@ const getWakewordName = () => {
 const getFontName = () => {
   if (props.config.theme.font.type === 'preset') {
     const presetNames = {
-      'font_puhui_deepseek_14_1': '普惠体 14px',
-      'font_puhui_deepseek_16_4': '普惠体 16px',
-      'font_puhui_deepseek_20_4': '普惠体 20px',
-      'font_puhui_deepseek_30_4': '普惠体 30px'
+      'font_puhui_deepseek_14_1': 'PuHui 14px',
+      'font_puhui_deepseek_16_4': 'PuHui 16px',
+      'font_puhui_deepseek_20_4': 'PuHui 20px',
+      'font_puhui_deepseek_30_4': 'PuHui 30px'
     }
     return presetNames[props.config.theme.font.preset] || props.config.theme.font.preset
   } else {
     const custom = props.config.theme.font.custom
-    return `自定义字体 ${custom.size}px`
+    return `Font tùy chỉnh ${custom.size}px`
   }
 }
 
@@ -505,37 +505,37 @@ const getEmojiName = () => {
     return props.config.theme.emoji.preset === 'twemoji64' ? 'Twemoji 64×64' : 'Twemoji 32×32'
   } else if (props.config.theme.emoji.type === 'custom') {
     const count = Object.keys(props.config.theme.emoji.custom.images).length
-    return `自定义表情 ${count}张`
+    return `Biểu tượng tùy chỉnh ${count} ảnh`
   } else {
-    return '未配置'
+    return 'Chưa cấu hình'
   }
 }
 
 const getSkinName = () => {
-  const light = props.config.theme.skin.light.backgroundType === 'image' ? '图片' : '颜色'
-  const dark = props.config.theme.skin.dark.backgroundType === 'image' ? '图片' : '颜色'
-  return `浅色${light}/深色${dark}`
+  const light = props.config.theme.skin.light.backgroundType === 'image' ? 'Hình ảnh' : 'Màu'
+  const dark = props.config.theme.skin.dark.backgroundType === 'image' ? 'Hình ảnh' : 'Màu'
+  return `Sáng ${light}/Tối ${dark}`
 }
 
-// 监听字体配置变化
+// Theo dõi thay đổi cấu hình font
 watch(() => props.config.theme.font, () => {
   loadFont()
 }, { deep: true })
 
-// 组件挂载
+// Gắn kết component
 onMounted(async () => {
-  // 确保有可用的表情
+  // Đảm bảo có biểu tượng cảm xúc khả dụng
   if (availableEmotions.value.length > 0) {
     currentEmoji.value = availableEmotions.value[0].key
   } else {
     currentEmoji.value = ''
   }
   
-  // 加载字体
+  // Tải font
   await loadFont()
 })
 
-// 组件卸载时清理字体
+// Dọn dẹp font khi hủy component
 onUnmounted(() => {
   const existingStyles = document.querySelectorAll('style[data-font-preview]')
   existingStyles.forEach(style => style.remove())

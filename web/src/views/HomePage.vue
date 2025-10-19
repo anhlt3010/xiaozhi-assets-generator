@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- 配置状态提示（右下角浮动通知） -->
+    <!-- Thông báo trạng thái cấu hình (Thông báo nổi góc phải dưới) -->
     <div
       v-if="hasStoredConfig"
       class="fixed bottom-4 right-4 z-50 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg transition-opacity duration-300 min-w-[300px]"
@@ -11,7 +11,7 @@
           <svg class="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
           </svg>
-          <span class="text-blue-800 font-medium">检测到已保存的配置</span>
+          <span class="text-blue-800 font-medium">Phát hiện cấu hình đã lưu</span>
         </div>
         <button 
           @click="closeConfigNotice"
@@ -23,19 +23,19 @@
         </button>
       </div>
       <p class="text-blue-600 text-sm mb-3">
-        配置已自动恢复，您可以继续之前的进度或重新开始
+        Cấu hình đã được khôi phục tự động, bạn có thể tiếp tục tiến độ trước đó hoặc bắt đầu lại
       </p>
       <div class="flex justify-end space-x-2">
         <button 
           @click="confirmReset"
           class="px-3 py-1 text-sm text-red-600 hover:text-red-800 font-medium"
         >
-          重新开始
+          Bắt đầu lại
         </button>
       </div>
     </div>
 
-    <!-- Step Indicator -->
+    <!-- Chỉ báo bước -->
     <div class="flex items-center justify-center mb-8">
       <div v-for="(step, index) in steps" :key="index" class="flex items-center">
         <div class="flex flex-col items-center">
@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <!-- Step Content -->
+    <!-- Nội dung bước -->
     <div class="bg-white rounded-lg shadow-sm border p-6">
       <ChipConfig 
         v-if="currentStep === 0"
@@ -74,7 +74,7 @@
       />
     </div>
 
-    <!-- Generate Modal -->
+    <!-- Modal tạo -->
     <GenerateModal
       v-if="showGenerateModal"
       :config="config"
@@ -84,8 +84,8 @@
       @cancelFlash="handleCancelFlash"
     />
 
-    <!-- Reset Confirmation Modal -->
-    <!-- 移除重置确认对话框 -->
+    <!-- Modal xác nhận đặt lại -->
+    <!-- Đã xóa hộp thoại xác nhận đặt lại -->
   </div>
 </template>
 
@@ -101,21 +101,21 @@ import WebSocketTransfer from '@/utils/WebSocketTransfer.js'
 
 const currentStep = ref(0)
 const showGenerateModal = ref(false)
-const activeThemeTab = ref('wakeword') // 保持主题设计页面的tab状态
+const activeThemeTab = ref('wakeword') // Giữ trạng thái tab của trang thiết kế giao diện
 
-// 存储相关状态
-const hasStoredConfig = ref(false) // 是否从存储中恢复了配置
-const isAutoSaveEnabled = ref(false) // 是否启用自动保存
+// Trạng thái liên quan đến lưu trữ
+const hasStoredConfig = ref(false) // Đã khôi phục cấu hình từ bộ nhớ hay chưa
+const isAutoSaveEnabled = ref(false) // Đã bật tự động lưu hay chưa
 const isResetting = ref(false)
 const isLoading = ref(true)
 const assetsBuilder = new AssetsBuilder()
-const autoHideTimer = ref(null) // 新增：自动隐藏定时器
-const webSocketTransfer = ref(null) // WebSocket传输实例
+const autoHideTimer = ref(null) // Mới thêm: Bộ đếm thời gian tự động ẩn
+const webSocketTransfer = ref(null) // Instance truyền WebSocket
 
 const steps = [
-  { title: '芯片配置', key: 'chip' },
-  { title: '主题设计', key: 'theme' },
-  { title: '效果预览', key: 'generate' }
+  { title: 'Cấu hình chip', key: 'chip' },
+  { title: 'Thiết kế giao diện', key: 'theme' },
+  { title: 'Xem trước hiệu ứng', key: 'generate' }
 ]
 
 const config = ref({
@@ -181,7 +181,7 @@ const nextStep = async () => {
   if (currentStep.value < steps.length - 1) {
     currentStep.value++
     
-    // 启用自动保存（如果还没启用的话）
+    // Bật tự động lưu (nếu chưa bật)
     if (!isAutoSaveEnabled.value) {
       isAutoSaveEnabled.value = true
       await saveConfigToStorage()
@@ -200,21 +200,21 @@ const handleGenerate = () => {
 }
 
 const handleModalGenerate = async (selectedItems) => {
-  // TODO: 实现实际的生成逻辑
+  // TODO: Triển khai logic tạo thực tế
 }
 
-// 获取URL参数中的token
+// Lấy token từ tham số URL
 const getToken = () => {
   const urlParams = new URLSearchParams(window.location.search)
   return urlParams.get('token')
 }
 
-// 调用MCP工具
+// Gọi công cụ MCP
 const callMcpTool = async (toolName, params = {}) => {
   try {
     const token = getToken()
     if (!token) {
-      throw new Error('未找到认证令牌')
+      throw new Error('Không tìm thấy token xác thực')
     }
 
     const response = await fetch('/api/messaging/device/tools/call', {
@@ -234,48 +234,48 @@ const callMcpTool = async (toolName, params = {}) => {
       return result
     } else {
       const errorText = await response.text()
-      throw new Error(`调用${toolName}失败: ${response.status} - ${errorText}`)
+      throw new Error(`Gọi ${toolName} thất bại: ${response.status} - ${errorText}`)
     }
   } catch (error) {
-    console.error(`调用MCP工具 ${toolName} 失败:`, error.message)
+    console.error(`Gọi công cụ MCP ${toolName} thất bại:`, error.message)
     throw error
   }
 }
 
-// 处理开始在线烧录
+// Xử lý bắt đầu nạp trực tuyến
 const handleStartFlash = async (flashData) => {
   const { blob, onProgress, onComplete, onError } = flashData
 
   try {
     const token = getToken()
     if (!token) {
-      throw new Error('未找到认证令牌')
+      throw new Error('Không tìm thấy token xác thực')
     }
 
-    // 步骤1: 检查设备状态
-    onProgress(5, '检查设备状态...')
+    // Bước 1: Kiểm tra trạng thái thiết bị
+    onProgress(5, 'Đang kiểm tra trạng thái thiết bị...')
     const deviceStatus = await callMcpTool('self.get_device_status')
-    // 检查设备是否在线（通过API调用成功来判断）
+    // Kiểm tra thiết bị có trực tuyến không (thông qua cuộc gọi API thành công)
 
-    // 步骤2: 初始化WebSocket传输并获取下载URL
-    onProgress(15, '初始化传输服务...')
+    // Bước 2: Khởi tạo truyền WebSocket và lấy URL tải xuống
+    onProgress(15, 'Đang khởi tạo dịch vụ truyền...')
     webSocketTransfer.value = new WebSocketTransfer(token)
 
-    // 创建一个Promise来等待下载URL准备好
+    // Tạo một Promise để đợi URL tải xuống sẵn sàng
     let downloadUrlReady = null
     const downloadUrlPromise = new Promise((resolve, reject) => {
       downloadUrlReady = resolve
     })
 
-    // 创建一个Promise来等待transfer_started事件
+    // Tạo một Promise để đợi sự kiện transfer_started
     let transferStartedResolver = null
     const transferStartedPromise = new Promise((resolve, reject) => {
       transferStartedResolver = resolve
     })
 
-    // 初始化WebSocket会话（只建立连接和获取URL）
+    // Khởi tạo phiên WebSocket (chỉ thiết lập kết nối và lấy URL)
     webSocketTransfer.value.onTransferStarted = () => {
-      // 当收到transfer_started事件时，resolve等待的Promise
+      // Khi nhận được sự kiện transfer_started, giải quyết Promise đang đợi
       if (transferStartedResolver) {
         transferStartedResolver()
         transferStartedResolver = null
@@ -285,52 +285,52 @@ const handleStartFlash = async (flashData) => {
     await webSocketTransfer.value.initializeSession(
       blob,
       (progress, step) => {
-        // 初始化进度：15-30
+        // Tiến độ khởi tạo: 15-30
         onProgress(15 + progress * 0.75, step)
       },
       (error) => {
-        console.error('WebSocket初始化失败:', error)
-        onError('初始化传输服务失败: ' + error.message)
+        console.error('Khởi tạo WebSocket thất bại:', error)
+        onError('Khởi tạo dịch vụ truyền thất bại: ' + error.message)
       },
       (downloadUrl) => {
         downloadUrlReady(downloadUrl)
       }
     )
 
-    // 等待下载URL准备好
+    // Đợi URL tải xuống sẵn sàng
     const downloadUrl = await downloadUrlPromise
 
-    // 步骤3: 设置设备的下载URL
-    onProgress(30, '设置设备下载URL...')
+    // Bước 3: Đặt URL tải xuống cho thiết bị
+    onProgress(30, 'Đang đặt URL tải xuống thiết bị...')
     await callMcpTool('self.assets.set_download_url', {
       url: downloadUrl
     })
 
-    // 步骤4: 重启设备
-    onProgress(40, '重启设备...')
-    // reboot指令没有返回值，不需要等待，直接调用
+    // Bước 4: Khởi động lại thiết bị
+    onProgress(40, 'Đang khởi động lại thiết bị...')
+    // Lệnh reboot không có giá trị trả về, không cần đợi, gọi trực tiếp
     callMcpTool('self.reboot').catch(error => {
-      console.warn('reboot指令调用警告（设备可能已重启）:', error)
-      // 即使reboot失败，也继续流程，因为设备可能已经重启
+      console.warn('Cảnh báo gọi lệnh reboot (thiết bị có thể đã khởi động lại):', error)
+      // Ngay cả khi reboot thất bại, tiếp tục quy trình vì thiết bị có thể đã khởi động lại
     })
 
-    // 步骤5: 等待设备重启并建立HTTP连接（通过transfer_started事件）
-    onProgress(50, '等待设备重启...')
+    // Bước 5: Đợi thiết bị khởi động lại và thiết lập kết nối HTTP (thông qua sự kiện transfer_started)
+    onProgress(50, 'Đang đợi thiết bị khởi động lại...')
 
-    // 等待transfer_started事件，设置60秒超时
+    // Đợi sự kiện transfer_started, đặt thời gian chờ 60 giây
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('等待设备重启超时（60秒）')), 60000)
+      setTimeout(() => reject(new Error('Thời gian chờ thiết bị khởi động lại (60 giây)')), 60000)
     })
 
     await Promise.race([transferStartedPromise, timeoutPromise])
 
-    // 步骤6: 开始实际的文件传输
-    onProgress(60, '开始传输文件...')
+    // Bước 6: Bắt đầu truyền tệp thực tế
+    onProgress(60, 'Đang bắt đầu truyền tệp...')
 
-    // 设备已准备好，直接开始传输（transfer_started已收到，sendFileData会立即执行）
+    // Thiết bị đã sẵn sàng, bắt đầu truyền trực tiếp (transfer_started đã nhận, sendFileData sẽ thực thi ngay)
     await webSocketTransfer.value.startTransfer(
       (progress, step) => {
-        // 文件传输进度：60-100
+        // Tiến độ truyền tệp: 60-100
         const adjustedProgress = 60 + (progress * 0.4)
         onProgress(Math.round(adjustedProgress), step)
       },
@@ -342,16 +342,16 @@ const handleStartFlash = async (flashData) => {
       }
     )
 
-    // 清理回调引用
+    // Dọn dẹp tham chiếu callback
     webSocketTransfer.value.onTransferStarted = null
 
   } catch (error) {
-    console.error('在线烧录失败:', error)
+    console.error('Nạp trực tuyến thất bại:', error)
     onError(error.message)
   }
 }
 
-// 处理取消烧录
+// Xử lý hủy nạp
 const handleCancelFlash = () => {
   if (webSocketTransfer.value) {
     webSocketTransfer.value.cancel()
@@ -364,35 +364,35 @@ const handleThemeTabChange = (tabId) => {
   activeThemeTab.value = tabId
 }
 
-// 从存储加载配置
+// Tải cấu hình từ bộ nhớ
 const loadConfigFromStorage = async () => {
   try {
     isLoading.value = true
     const storedData = await configStorage.loadConfig()
     
     if (storedData) {
-      // 恢复配置
+      // Khôi phục cấu hình
       config.value = storedData.config
       currentStep.value = storedData.currentStep
       activeThemeTab.value = storedData.activeThemeTab
-      hasStoredConfig.value = true // 显示"检测到已保存的配置"提示
-      isAutoSaveEnabled.value = true // 启用自动保存
+      hasStoredConfig.value = true // Hiển thị thông báo "Phát hiện cấu hình đã lưu"
+      isAutoSaveEnabled.value = true // Bật tự động lưu
       
-      // 清除之前的定时器
+      // Xóa bộ đếm thời gian trước đó
       if (autoHideTimer.value) {
         clearTimeout(autoHideTimer.value)
       }
       
-      // 设置5秒后自动隐藏提示
+      // Đặt tự động ẩn thông báo sau 5 giây
       autoHideTimer.value = setTimeout(() => {
         hasStoredConfig.value = false
       }, 5000)
       
-      // 设置 AssetsBuilder 的配置（非严格模式，允许先恢复文件再校验）
+      // Đặt cấu hình cho AssetsBuilder (chế độ không nghiêm ngặt, cho phép khôi phục tệp trước khi kiểm tra)
       assetsBuilder.setConfig(config.value, { strict: false })
       await assetsBuilder.restoreAllResourcesFromStorage(config.value)
       
-      // 触发一次浅拷贝以刷新引用，避免渲染时对占位值执行 createObjectURL
+      // Kích hoạt một lần sao chép nông để làm mới tham chiếu, tránh thực thi createObjectURL trên giá trị giữ chỗ khi render
       try {
         const images = config.value?.theme?.emoji?.custom?.images || {}
         config.value = {
@@ -415,7 +415,7 @@ const loadConfigFromStorage = async () => {
       isAutoSaveEnabled.value = false
     }
   } catch (error) {
-    console.error('加载配置失败:', error)
+    console.error('Tải cấu hình thất bại:', error)
     hasStoredConfig.value = false
     isAutoSaveEnabled.value = false
   } finally {
@@ -423,24 +423,24 @@ const loadConfigFromStorage = async () => {
   }
 }
 
-// 保存配置到存储
+// Lưu cấu hình vào bộ nhớ
 const saveConfigToStorage = async () => {
   try {
     await configStorage.saveConfig(config.value, currentStep.value, activeThemeTab.value)
   } catch (error) {
-    console.error('保存配置失败:', error)
+    console.error('Lưu cấu hình thất bại:', error)
   }
 }
 
-// 确认重新开始
+// Xác nhận bắt đầu lại
 const confirmReset = async () => {
   try {
     isResetting.value = true
     
-    // 清理 AssetsBuilder 的存储数据
+    // Dọn dẹp dữ liệu lưu trữ của AssetsBuilder
     await assetsBuilder.clearAllStoredData()
     
-    // 重置配置到默认值
+    // Đặt lại cấu hình về giá trị mặc định
     config.value = {
       chip: {
         model: '',
@@ -489,55 +489,55 @@ const confirmReset = async () => {
       }
     }
     
-    // 重置步骤和状态
+    // Đặt lại bước và trạng thái
     currentStep.value = 0
     activeThemeTab.value = 'wakeword'
     hasStoredConfig.value = false
     isAutoSaveEnabled.value = false
     
   } catch (error) {
-    console.error('重置配置失败:', error)
-    alert('重置失败，请刷新页面重试')
+    console.error('Đặt lại cấu hình thất bại:', error)
+    alert('Đặt lại thất bại, vui lòng làm mới trang và thử lại')
   } finally {
     isResetting.value = false
   }
 }
 
-// 监听配置变化，自动保存
+// Theo dõi thay đổi cấu hình, tự động lưu
 watch(config, async (newConfig) => {
   if (!isLoading.value && isAutoSaveEnabled.value) {
     await saveConfigToStorage()
   }
 }, { deep: true })
 
-// 监听步骤变化，自动保存
+// Theo dõi thay đổi bước, tự động lưu
 watch(currentStep, async () => {
   if (!isLoading.value && isAutoSaveEnabled.value) {
     await saveConfigToStorage()
   }
 })
 
-// 监听主题标签变化，自动保存
+// Theo dõi thay đổi tab giao diện, tự động lưu
 watch(activeThemeTab, async () => {
   if (!isLoading.value && isAutoSaveEnabled.value) {
     await saveConfigToStorage()
   }
 })
 
-// 页面加载时初始化
+// Khởi tạo khi tải trang
 onMounted(async () => {
   await configStorage.initialize()
   await loadConfigFromStorage()
 })
 
-// 组件卸载时清除定时器
+// Xóa bộ đếm thời gian khi hủy component
 onUnmounted(() => {
   if (autoHideTimer.value) {
     clearTimeout(autoHideTimer.value)
   }
 })
 
-// 修改关闭按钮逻辑
+// Sửa logic nút đóng
 const closeConfigNotice = () => {
   hasStoredConfig.value = false
   if (autoHideTimer.value) {
@@ -545,14 +545,14 @@ const closeConfigNotice = () => {
   }
 }
 
-// 重置自动隐藏定时器（鼠标悬停时调用）
+// Đặt lại bộ đếm thời gian tự động ẩn (gọi khi di chuột vào)
 const resetAutoHideTimer = () => {
-  // 清除之前的定时器
+  // Xóa bộ đếm thời gian trước đó
   if (autoHideTimer.value) {
     clearTimeout(autoHideTimer.value)
   }
 
-  // 设置新的5秒定时器
+  // Đặt bộ đếm thời gian 5 giây mới
   autoHideTimer.value = setTimeout(() => {
     hasStoredConfig.value = false
   }, 5000)

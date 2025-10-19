@@ -1,15 +1,15 @@
 /**
- * StorageHelper 工具类
- * 为各个组件提供便捷的文件存储功能
+ * StorageHelper - lớp tiện ích
+ * Cung cấp chức năng lưu trữ tệp thuận tiện cho các component
  */
 
 import configStorage from './ConfigStorage.js'
 
 class StorageHelper {
   /**
-   * 为字体文件提供自动保存功能
-   * @param {File} file - 字体文件
-   * @param {Object} config - 字体配置
+   * Tự động lưu tệp font
+   * @param {File} file - tệp font
+   * @param {Object} config - cấu hình font
    * @returns {Promise<void>}
    */
   static async saveFontFile(file, config = {}) {
@@ -21,18 +21,18 @@ class StorageHelper {
           bpp: config.bpp || 4,
           charset: config.charset || 'deepseek'
         })
-        console.log(`字体文件已保存: ${file.name}`)
+  console.log(`Đã lưu tệp font: ${file.name}`)
       } catch (error) {
-        console.warn(`保存字体文件失败: ${file.name}`, error)
+  console.warn(`Không lưu được tệp font: ${file.name}`, error)
       }
     }
   }
 
   /**
-   * 为表情文件提供自动保存功能
-   * @param {string} emojiName - 表情名称
-   * @param {File} file - 表情文件
-   * @param {Object} config - 表情配置
+   * Tự động lưu tệp emoji
+   * @param {string} emojiName - tên emoji
+   * @param {File} file - tệp emoji
+   * @param {Object} config - cấu hình emoji
    * @returns {Promise<void>}
    */
   static async saveEmojiFile(emojiName, file, config = {}) {
@@ -43,24 +43,24 @@ class StorageHelper {
         const height = config?.size?.height ?? 64
         const format = config?.format ?? 'png'
 
-        // 传入可克隆的普通对象，避免 Vue Proxy
+  // Truyền đối tượng thường có thể clone được để tránh Vue Proxy
         await configStorage.saveFile(key, file, 'emoji', {
           name: emojiName,
           size: { width, height },
           format
         })
-        console.log(`表情文件已保存: ${emojiName} - ${file.name}`)
+  console.log(`Đã lưu tệp emoji: ${emojiName} - ${file.name}`)
       } catch (error) {
-        console.warn(`保存表情文件失败: ${emojiName}`, error)
+  console.warn(`Không lưu được tệp emoji: ${emojiName}`, error)
       }
     }
   }
 
   /**
-   * 为背景文件提供自动保存功能
-   * @param {string} mode - 模式 ('light' 或 'dark')
-   * @param {File} file - 背景文件
-   * @param {Object} config - 背景配置
+   * Tự động lưu tệp nền
+   * @param {string} mode - chế độ ('light' hoặc 'dark')
+   * @param {File} file - tệp nền
+   * @param {Object} config - cấu hình nền
    * @returns {Promise<void>}
    */
   static async saveBackgroundFile(mode, file, config = {}) {
@@ -78,29 +78,29 @@ class StorageHelper {
           mode,
           ...safeConfig
         })
-        console.log(`背景文件已保存: ${mode} - ${file.name}`)
+        console.log(`Đã lưu tệp nền: ${mode} - ${file.name}`)
       } catch (error) {
-        console.warn(`保存背景文件失败: ${mode}`, error)
+        console.warn(`Không lưu được tệp nền: ${mode}`, error)
       }
     }
   }
 
   /**
-   * 恢复字体文件
+   * Khôi phục tệp font
    * @returns {Promise<File|null>}
    */
   static async restoreFontFile() {
     try {
       return await configStorage.loadFile('custom_font')
     } catch (error) {
-      console.warn('恢复字体文件失败:', error)
+      console.warn('Khôi phục tệp font thất bại:', error)
       return null
     }
   }
 
   /**
-   * 恢复表情文件
-   * @param {string} emojiName - 表情名称
+   * Khôi phục tệp emoji
+   * @param {string} emojiName - tên emoji
    * @returns {Promise<File|null>}
    */
   static async restoreEmojiFile(emojiName) {
@@ -110,14 +110,14 @@ class StorageHelper {
       const key = `emoji_${emojiName}`
       return await configStorage.loadFile(key)
     } catch (error) {
-      console.warn(`恢复表情文件失败: ${emojiName}`, error)
+      console.warn(`Khôi phục tệp emoji thất bại: ${emojiName}`, error)
       return null
     }
   }
 
   /**
-   * 恢复背景文件
-   * @param {string} mode - 模式 ('light' 或 'dark')
+   * Khôi phục tệp nền
+   * @param {string} mode - chế độ ('light' hoặc 'dark')
    * @returns {Promise<File|null>}
    */
   static async restoreBackgroundFile(mode) {
@@ -127,27 +127,27 @@ class StorageHelper {
       const key = `background_${mode}`
       return await configStorage.loadFile(key)
     } catch (error) {
-      console.warn(`恢复背景文件失败: ${mode}`, error)
+      console.warn(`Khôi phục tệp nền thất bại: ${mode}`, error)
       return null
     }
   }
 
   /**
-   * 删除字体文件
+   * Xóa tệp font
    * @returns {Promise<void>}
    */
   static async deleteFontFile() {
     try {
       await configStorage.deleteFile('custom_font')
-      console.log('字体文件已删除')
+      console.log('Đã xóa tệp font')
     } catch (error) {
-      console.warn('删除字体文件失败:', error)
+      console.warn('Xóa tệp font thất bại:', error)
     }
   }
 
   /**
-   * 删除表情文件
-   * @param {string} emojiName - 表情名称
+   * Xóa tệp emoji
+   * @param {string} emojiName - tên emoji
    * @returns {Promise<void>}
    */
   static async deleteEmojiFile(emojiName) {
@@ -156,15 +156,15 @@ class StorageHelper {
     try {
       const key = `emoji_${emojiName}`
       await configStorage.deleteFile(key)
-      console.log(`表情文件已删除: ${emojiName}`)
+      console.log(`Đã xóa tệp emoji: ${emojiName}`)
     } catch (error) {
-      console.warn(`删除表情文件失败: ${emojiName}`, error)
+      console.warn(`Xóa tệp emoji thất bại: ${emojiName}`, error)
     }
   }
 
   /**
-   * 删除背景文件
-   * @param {string} mode - 模式 ('light' 或 'dark')
+   * Xóa tệp nền
+   * @param {string} mode - chế độ ('light' hoặc 'dark')
    * @returns {Promise<void>}
    */
   static async deleteBackgroundFile(mode) {
@@ -173,21 +173,21 @@ class StorageHelper {
     try {
       const key = `background_${mode}`
       await configStorage.deleteFile(key)
-      console.log(`背景文件已删除: ${mode}`)
+      console.log(`Đã xóa tệp nền: ${mode}`)
     } catch (error) {
-      console.warn(`删除背景文件失败: ${mode}`, error)
+      console.warn(`Xóa tệp nền thất bại: ${mode}`, error)
     }
   }
 
   /**
-   * 获取文件存储信息
+   * Lấy thông tin lưu trữ tệp
    * @returns {Promise<Object>}
    */
   static async getStorageInfo() {
     try {
       return await configStorage.getStorageInfo()
     } catch (error) {
-      console.warn('获取存储信息失败:', error)
+      console.warn('Lấy thông tin lưu trữ thất bại:', error)
       return {
         configs: { count: 0 },
         files: { count: 0 },
@@ -198,15 +198,15 @@ class StorageHelper {
   }
 
   /**
-   * 清理所有文件存储
+   * Xóa tất cả tệp lưu trữ
    * @returns {Promise<void>}
    */
   static async clearAllFiles() {
     try {
       await configStorage.clearAll()
-      console.log('所有存储文件已清理')
+      console.log('Đã xóa tất cả tệp lưu trữ')
     } catch (error) {
-      console.warn('清理存储文件失败:', error)
+      console.warn('Xóa tệp lưu trữ thất bại:', error)
       throw error
     }
   }

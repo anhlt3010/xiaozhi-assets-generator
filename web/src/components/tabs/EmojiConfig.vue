@@ -1,11 +1,11 @@
 <template>
   <div class="space-y-6">
     <div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">表情集合配置</h3>
-      <p class="text-gray-600">选择预设表情包或自定义表情图片。每个表情包包含21种不同情绪的表情。</p>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Cấu hình bộ biểu tượng cảm xúc</h3>
+      <p class="text-gray-600">Chọn bộ biểu tượng có sẵn hoặc tùy chỉnh hình ảnh biểu tượng. Mỗi bộ biểu tượng bao gồm 21 biểu cảm khác nhau.</p>
     </div>
 
-    <!-- 表情类型选择 -->
+    <!-- Lựa chọn loại biểu tượng -->
     <div class="space-y-4">
       <div class="flex space-x-4">
         <button
@@ -17,7 +17,7 @@
               : 'border-gray-300 hover:border-gray-400'
           ]"
         >
-          预设表情包
+          Bộ biểu tượng có sẵn
         </button>
         <button
           @click="setEmojiType('custom')"
@@ -28,14 +28,14 @@
               : 'border-gray-300 hover:border-gray-400'
           ]"
         >
-          自定义表情包
+          Bộ biểu tượng tùy chỉnh
         </button>
       </div>
     </div>
 
-    <!-- 预设表情包选择 -->
+    <!-- Chọn bộ biểu tượng có sẵn -->
     <div v-if="modelValue.type === 'preset'" class="space-y-4">
-      <h4 class="font-medium text-gray-900">选择预设表情包</h4>
+      <h4 class="font-medium text-gray-900">Chọn bộ biểu tượng có sẵn</h4>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div
           v-for="pack in presetEmojis"
@@ -53,7 +53,7 @@
               <h5 class="font-medium text-gray-900">{{ pack.name }}</h5>
               <p class="text-sm text-gray-600">{{ pack.description }}</p>
               <div class="text-xs text-gray-500 mt-1">
-                尺寸: {{ pack.size }}px × {{ pack.size }}px
+                Kích thước: {{ pack.size }}px × {{ pack.size }}px
               </div>
             </div>
             <div 
@@ -68,7 +68,7 @@
             </div>
           </div>
           
-          <!-- 表情预览网格 -->
+          <!-- Lưới xem trước biểu tượng -->
           <div class="grid grid-cols-7 gap-1 justify-items-center">
             <div
               v-for="emotion in pack.preview"
@@ -89,15 +89,15 @@
       </div>
     </div>
 
-    <!-- 自定义表情包 -->
+    <!-- Bộ biểu tượng tùy chỉnh -->
     <div v-if="modelValue.type === 'custom'" class="space-y-6">
-      <h4 class="font-medium text-gray-900">自定义表情包配置</h4>
+      <h4 class="font-medium text-gray-900">Cấu hình bộ biểu tượng tùy chỉnh</h4>
       
-      <!-- 基本配置 -->
+      <!-- Cấu hình cơ bản -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- 图片尺寸 -->
+        <!-- Kích thước hình ảnh -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">图片宽度 (px)</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Chiều rộng hình ảnh (px)</label>
           <input
             type="number"
             v-model.number="localCustom.size.width"
@@ -108,7 +108,7 @@
         </div>
         
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">图片高度 (px)</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Chiều cao hình ảnh (px)</label>
           <input
             type="number"
             v-model.number="localCustom.size.height"
@@ -119,9 +119,9 @@
         </div>
       </div>
 
-      <!-- 表情图片上传 -->
+      <!-- Tải lên hình ảnh biểu tượng -->
       <div class="space-y-4">
-        <h5 class="font-medium text-gray-900">上传表情图片</h5>
+        <h5 class="font-medium text-gray-900">Tải lên hình ảnh biểu tượng</h5>
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
           <div
             v-for="emotion in emotionList"
@@ -131,7 +131,7 @@
             <div class="text-center">
               <div class="text-lg mb-1">{{ emotion.emoji }}</div>
               <div class="text-xs text-gray-600">{{ emotion.name }}</div>
-              <div v-if="emotion.key === 'neutral'" class="text-xs text-red-500">必需</div>
+              <div v-if="emotion.key === 'neutral'" class="text-xs text-red-500">Bắt buộc</div>
             </div>
             
             <div 
@@ -159,7 +159,7 @@
                 <svg class="w-6 h-6 text-gray-400 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                <div class="text-xs text-gray-500">点击上传</div>
+                <div class="text-xs text-gray-500">Nhấp để tải lên</div>
               </div>
               
               <div v-else class="w-full h-full relative">
@@ -182,12 +182,12 @@
         </div>
         
         <div class="text-xs text-gray-500 mt-2">
-          * 必须上传 neutral 默认表情，其他表情可选。如果不上传其他表情，将使用默认表情代替。
+          * Bắt buộc phải tải lên biểu tượng mặc định (neutral), các biểu tượng khác là tùy chọn. Nếu không tải lên biểu tượng khác, hệ thống sẽ sử dụng biểu tượng mặc định thay thế.
         </div>
       </div>
     </div>
 
-    <!-- 当前配置状态 -->
+    <!-- Trạng thái cấu hình hiện tại -->
     <div v-if="hasValidConfig" class="bg-green-50 border border-green-200 rounded-lg p-4">
       <div class="flex">
         <div class="flex-shrink-0">
@@ -196,7 +196,7 @@
           </svg>
         </div>
         <div class="ml-3">
-          <h4 class="text-sm font-medium text-green-800">表情配置完成</h4>
+          <h4 class="text-sm font-medium text-green-800">Cấu hình biểu tượng hoàn tất</h4>
           <div class="mt-1 text-sm text-green-700">
             {{ getConfigSummary() }}
           </div>
@@ -223,41 +223,41 @@ const presetEmojis = [
   {
     id: 'twemoji32',
     name: 'Twemoji 32x32',
-    description: 'Twitter表情包，32×32像素',
+    description: 'Bộ biểu tượng Twitter, 32×32 pixel',
     size: 32,
     preview: ['neutral', 'happy', 'laughing', 'funny', 'sad', 'angry', 'crying']
   },
   {
     id: 'twemoji64',
     name: 'Twemoji 64x64', 
-    description: 'Twitter表情包，64×64像素',
+    description: 'Bộ biểu tượng Twitter, 64×64 pixel',
     size: 64,
     preview: ['neutral', 'happy', 'laughing', 'funny', 'sad', 'angry', 'crying']
   }
 ]
 
 const emotionList = [
-  { key: 'neutral', name: '默认', emoji: '😶' },
-  { key: 'happy', name: '开心', emoji: '🙂' },
-  { key: 'laughing', name: '大笑', emoji: '😆' },
-  { key: 'funny', name: '搞笑', emoji: '😂' },
-  { key: 'sad', name: '伤心', emoji: '😔' },
-  { key: 'angry', name: '生气', emoji: '😠' },
-  { key: 'crying', name: '哭泣', emoji: '😭' },
-  { key: 'loving', name: '喜爱', emoji: '😍' },
-  { key: 'embarrassed', name: '尴尬', emoji: '😳' },
-  { key: 'surprised', name: '惊讶', emoji: '😯' },
-  { key: 'shocked', name: '震惊', emoji: '😱' },
-  { key: 'thinking', name: '思考', emoji: '🤔' },
-  { key: 'winking', name: '眨眼', emoji: '😉' },
-  { key: 'cool', name: '酷炫', emoji: '😎' },
-  { key: 'relaxed', name: '放松', emoji: '😌' },
-  { key: 'delicious', name: '美味', emoji: '🤤' },
-  { key: 'kissy', name: '飞吻', emoji: '😘' },
-  { key: 'confident', name: '自信', emoji: '😏' },
-  { key: 'sleepy', name: '困倦', emoji: '😴' },
-  { key: 'silly', name: '调皮', emoji: '😜' },
-  { key: 'confused', name: '困惑', emoji: '🙄' }
+  { key: 'neutral', name: 'Mặc định', emoji: '😶' },
+  { key: 'happy', name: 'Vui vẻ', emoji: '🙂' },
+  { key: 'laughing', name: 'Cười lớn', emoji: '😆' },
+  { key: 'funny', name: 'Hài hước', emoji: '😂' },
+  { key: 'sad', name: 'Buồn', emoji: '😔' },
+  { key: 'angry', name: 'Tức giận', emoji: '😠' },
+  { key: 'crying', name: 'Khóc', emoji: '😭' },
+  { key: 'loving', name: 'Yêu thích', emoji: '😍' },
+  { key: 'embarrassed', name: 'Ngượng ngùng', emoji: '😳' },
+  { key: 'surprised', name: 'Ngạc nhiên', emoji: '😯' },
+  { key: 'shocked', name: 'Choáng váng', emoji: '😱' },
+  { key: 'thinking', name: 'Suy nghĩ', emoji: '🤔' },
+  { key: 'winking', name: 'Nháy mắt', emoji: '😉' },
+  { key: 'cool', name: 'Ngầu', emoji: '😎' },
+  { key: 'relaxed', name: 'Thư giãn', emoji: '😌' },
+  { key: 'delicious', name: 'Ngon', emoji: '🤤' },
+  { key: 'kissy', name: 'Hôn gió', emoji: '😘' },
+  { key: 'confident', name: 'Tự tin', emoji: '😏' },
+  { key: 'sleepy', name: 'Buồn ngủ', emoji: '😴' },
+  { key: 'silly', name: 'Nghịch ngợm', emoji: '😜' },
+  { key: 'confused', name: 'Bối rối', emoji: '🙄' }
 ]
 
 const localCustom = ref({
@@ -269,7 +269,7 @@ const hasValidConfig = computed(() => {
 })
 
 const setEmojiType = (type) => {
-  // 避免重复设置相同类型
+  // Tránh thiết lập lại cùng loại nhiều lần
   if (props.modelValue.type === type) return
   
   const newValue = { ...props.modelValue, type }
@@ -292,7 +292,7 @@ const setEmojiType = (type) => {
 }
 
 const selectPresetEmoji = (id) => {
-  // 避免重复选择相同预设
+  // Tránh chọn lại cùng bộ có sẵn
   if (props.modelValue.preset === id) return
   
   emit('update:modelValue', {
@@ -337,13 +337,13 @@ const updateEmojiImage = async (emotionKey, file) => {
       }
     })
 
-    // 自动保存表情文件到存储
+    // Tự động lưu tệp biểu tượng vào bộ nhớ
     await StorageHelper.saveEmojiFile(emotionKey, file, {
       size: localCustom.value.size,
       format: fileExtension
     })
   } else {
-    alert('请选择有效的PNG或GIF格式图片')
+    alert('Vui lòng chọn hình ảnh định dạng PNG hoặc GIF hợp lệ')
   }
 }
 
@@ -359,7 +359,7 @@ const removeImage = async (emotionKey) => {
     }
   })
 
-  // 删除存储中的表情文件
+  // Xóa tệp biểu tượng trong bộ nhớ
   await StorageHelper.deleteEmojiFile(emotionKey)
 }
 
@@ -373,7 +373,7 @@ const getImagePreview = (emotionKey) => {
     return getPresetEmojiUrl(props.modelValue.preset, emotionKey)
   } else {
     const file = props.modelValue.custom.images[emotionKey]
-    // 仅当为 File 或 Blob 时创建预览，避免恢复后占位对象导致报错
+    // Chỉ tạo xem trước khi là File hoặc Blob, tránh lỗi do đối tượng placeholder sau khi khôi phục
     if (file instanceof File || file instanceof Blob) {
       return URL.createObjectURL(file)
     }
@@ -382,28 +382,28 @@ const getImagePreview = (emotionKey) => {
 }
 
 const handleImageError = (event) => {
-  console.warn('Failed to load emoji image:', event.target.src)
-  // 可以设置一个默认的fallback图片
+  console.warn('Không thể tải hình ảnh biểu tượng:', event.target.src)
+  // Có thể đặt một hình ảnh fallback mặc định
   event.target.style.display = 'none'
 }
 
 const getConfigSummary = () => {
   if (props.modelValue.type === 'preset') {
     const preset = presetEmojis.find(p => p.id === props.modelValue.preset)
-    return preset ? `使用预设表情包: ${preset.name}` : ''
+    return preset ? `Sử dụng bộ biểu tượng có sẵn: ${preset.name}` : ''
   } else {
     const imageCount = Object.keys(props.modelValue.custom.images).length
     const size = localCustom.value.size
-    return `自定义表情包: ${imageCount} 张图片 (${size.width}×${size.height}px)`
+    return `Bộ biểu tượng tùy chỉnh: ${imageCount} hình ảnh (${size.width}×${size.height}px)`
   }
 }
 
-// 移除可能导致无限递归的 watch
-// 使用 computed 来同步 localCustom，避免双向绑定冲突
+// Xóa watch có thể gây đệ quy vô hạn
+// Sử dụng computed để đồng bộ localCustom, tránh xung đột ràng buộc hai chiều
 watch(() => localCustom.value.size, (newSize) => {
   if (props.modelValue.type === 'custom') {
     const currentCustom = props.modelValue.custom
-    // 只在尺寸实际值改变时触发更新
+    // Chỉ kích hoạt cập nhật khi giá trị kích thước thực sự thay đổi
     if (JSON.stringify(currentCustom.size) !== JSON.stringify(newSize)) {
       emit('update:modelValue', {
         ...props.modelValue,
@@ -416,7 +416,7 @@ watch(() => localCustom.value.size, (newSize) => {
   }
 }, { deep: true })
 
-// 初始化 localCustom
+// Khởi tạo localCustom
 if (props.modelValue.custom.size) {
   localCustom.value = {
     size: { ...props.modelValue.custom.size }

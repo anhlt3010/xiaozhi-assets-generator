@@ -1,6 +1,6 @@
 /**
- * BrowserFontConverter - 完整的浏览器端字体转换器
- * 基于 lv_font_conv 的核心逻辑，适配浏览器环境
+ * BrowserFontConverter - Trình chuyển đổi phông chữ đầy đủ cho trình duyệt
+ * Dựa trên logic lõi của lv_font_conv, thích ứng cho môi trường trình duyệt
  */
 
 import opentype from 'opentype.js'
@@ -16,19 +16,19 @@ class BrowserFontConverter {
   }
 
   /**
-   * 初始化转换器
+   * Khởi tạo bộ chuyển đổi
    */
   async initialize() {
     if (this.initialized) return
     
     try {
-      // 检查依赖是否可用
+      // Kiểm tra các phụ thuộc có sẵn
       if (typeof opentype === 'undefined') {
-        throw new Error('opentype.js 未加载')
+        throw new Error('opentype.js chưa được nạp')
       }
       
       this.initialized = true
-      console.log('BrowserFontConverter 初始化完成')
+  console.log('BrowserFontConverter khởi tạo hoàn tất')
     } catch (error) {
       console.error('BrowserFontConverter 初始化失败:', error)
       throw error
@@ -36,7 +36,7 @@ class BrowserFontConverter {
   }
 
   /**
-   * 验证字体文件
+   * Xác thực tệp phông chữ
    */
   validateFont(fontFile) {
     if (!fontFile) return false
@@ -49,7 +49,7 @@ class BrowserFontConverter {
         fileName.endsWith(`.${ext}`)
       )
       
-      const validMimeType = [
+  const validMimeType = [
         'font/ttf', 'font/truetype', 'application/x-font-ttf',
         'font/woff', 'font/woff2', 'application/font-woff',
         'font/otf', 'application/x-font-otf'
@@ -58,11 +58,11 @@ class BrowserFontConverter {
       return validExtension || validMimeType
     }
     
-    return fontFile instanceof ArrayBuffer && fontFile.byteLength > 0
+  return fontFile instanceof ArrayBuffer && fontFile.byteLength > 0
   }
 
   /**
-   * 获取字体信息
+   * Lấy thông tin phông chữ
    */
   async getFontInfo(fontFile) {
     try {
@@ -77,7 +77,7 @@ class BrowserFontConverter {
       }
       
       const font = opentype.parse(buffer)
-      
+
       return {
         familyName: this.getLocalizedName(font.names.fontFamily) || 'Unknown',
         fullName: this.getLocalizedName(font.names.fullName) || 'Unknown',
@@ -90,7 +90,7 @@ class BrowserFontConverter {
         supported: true
       }
     } catch (error) {
-      console.error('获取字体信息失败:', error)
+      console.error('Lấy thông tin phông chữ thất bại:', error)
       return {
         familyName: 'Unknown',
         supported: false,
@@ -100,7 +100,7 @@ class BrowserFontConverter {
   }
 
   /**
-   * 获取本地化名称
+   * Lấy tên bản địa hóa
    */
   getLocalizedName(nameObj) {
     if (!nameObj) return null
@@ -111,7 +111,7 @@ class BrowserFontConverter {
   }
 
   /**
-   * 转换字体为 CBIN 格式
+   * Chuyển đổi phông chữ sang định dạng CBIN
    */
   async convertToCBIN(options) {
     if (!this.initialized) {
@@ -133,11 +133,11 @@ class BrowserFontConverter {
     } = options
 
     if (!this.validateFont(fontFile)) {
-      throw new AppError('不支持的字体文件格式')
+      throw new AppError('Định dạng tệp phông chữ không được hỗ trợ')
     }
 
     try {
-      if (progressCallback) progressCallback(0, '开始处理字体...')
+  if (progressCallback) progressCallback(0, 'Bắt đầu xử lý phông chữ...')
 
       // 准备字体数据
       let fontBuffer
@@ -147,12 +147,12 @@ class BrowserFontConverter {
         fontBuffer = fontFile
       }
 
-      if (progressCallback) progressCallback(10, '解析字体结构...')
+  if (progressCallback) progressCallback(10, 'Phân tích cấu trúc phông chữ...')
 
       // 构建字符范围和符号（使用异步版本支持从文件加载字符集）
       const { ranges, charSymbols } = await this.parseCharacterInputAsync(charset, symbols, range)
 
-      if (progressCallback) progressCallback(20, '准备转换参数...')
+  if (progressCallback) progressCallback(20, 'Chuẩn bị tham số chuyển đổi...')
 
       // 构建转换参数
       const convertArgs = {
@@ -177,29 +177,29 @@ class BrowserFontConverter {
         output: fontName || 'font'
       }
 
-      if (progressCallback) progressCallback(30, '收集字体数据...')
+  if (progressCallback) progressCallback(30, 'Thu thập dữ liệu phông chữ...')
 
       // 收集字体数据
       const fontData = await collect_font_data(convertArgs)
 
-      if (progressCallback) progressCallback(70, '生成 CBIN 格式...')
+  if (progressCallback) progressCallback(70, 'Tạo dữ liệu CBIN...')
 
       // 生成 CBIN 数据
       const result = write_cbin(convertArgs, fontData)
       const outputName = convertArgs.output
       
-      if (progressCallback) progressCallback(100, '转换完成!')
+  if (progressCallback) progressCallback(100, 'Chuyển đổi hoàn tất!')
 
       return result[outputName]
 
     } catch (error) {
-      console.error('字体转换失败:', error)
-      throw new AppError(`字体转换失败: ${error.message}`)
+      console.error('Chuyển đổi phông chữ thất bại:', error)
+      throw new AppError(`Chuyển đổi phông chữ thất bại: ${error.message}`)
     }
   }
 
   /**
-   * 解析字符输入（字符集、符号、范围）- 异步版本
+   * Phân tích input ký tự (charset, symbols, range) - phiên bản bất đồng bộ
    */
   async parseCharacterInputAsync(charset, symbols, range) {
     let ranges = []
@@ -220,7 +220,7 @@ class BrowserFontConverter {
   }
 
   /**
-   * 解析字符输入（字符集、符号、范围）- 同步版本（向后兼容）
+   * Phân tích input ký tự (charset, symbols, range) - phiên bản đồng bộ (tương thích)
    */
   parseCharacterInput(charset, symbols, range) {
     let ranges = []
@@ -242,7 +242,7 @@ class BrowserFontConverter {
 
 
   /**
-   * 异步加载字符集文件
+   * Tải file charset bất đồng bộ
    */
   async loadCharsetFromFile(charset) {
     const charsetFiles = {
@@ -262,21 +262,21 @@ class BrowserFontConverter {
         throw new Error(`Failed to load charset file: ${response.status}`)
       }
       
-      const text = await response.text()
-      // 将每行的字符连接成一个字符串，保留所有字符（包括空白字符）
-      const characters = text.split('\n').join('')
+  const text = await response.text()
+  // Nối các ký tự trên mỗi dòng thành một chuỗi, giữ lại tất cả ký tự (kể cả khoảng trắng)
+  const characters = text.split('\n').join('')
       
-      // 缓存结果
-      this.charsetCache.set(charset, characters)
+  // Lưu vào cache
+  this.charsetCache.set(charset, characters)
       return characters
     } catch (error) {
-      console.error(`Failed to load charset ${charset}:`, error)
+  console.error(`Tải charset ${charset} thất bại:`, error)
       return null
     }
   }
 
   /**
-   * 获取字符集内容（同步方法，用于已缓存的字符集）
+   * Lấy nội dung charset (đồng bộ, dùng cho charset đã cache)
    */
   getCharsetContent(charset) {
     const charsets = {}
@@ -286,17 +286,17 @@ class BrowserFontConverter {
       return this.charsetCache.get(charset)
     }
     
-    // 如果请求 basic，重定向到 latin（向后兼容）
+  // Nếu yêu cầu 'basic', chuyển sang 'latin' (tương thích)
     if (charset === 'basic') {
       return this.getCharsetContent('latin')
     }
     
-    // 默认返回空字符串，需要先调用异步方法加载
+  // Mặc định trả về chuỗi rỗng, cần gọi phương thức bất đồng bộ để tải trước
     return charsets[charset] || ''
   }
 
   /**
-   * 异步获取字符集内容
+   * Lấy nội dung charset bất đồng bộ
    */
   async getCharsetContentAsync(charset) {
     // 如果请求 basic，重定向到 latin（向后兼容）
@@ -304,12 +304,12 @@ class BrowserFontConverter {
       charset = 'latin'
     }
     
-    // 如果字符集已缓存，直接返回
+  // Nếu charset đã được cache, trả về ngay
     if (this.charsetCache.has(charset)) {
       return this.charsetCache.get(charset)
     }
     
-    // 对于需要从文件加载的字符集
+  // Với các charset cần tải từ file
     if (charset === 'latin' || charset === 'deepseek' || charset === 'gb2312') {
       const loadedCharset = await this.loadCharsetFromFile(charset)
       if (loadedCharset) {
@@ -322,7 +322,7 @@ class BrowserFontConverter {
   }
 
   /**
-   * 解析 Unicode 范围字符串
+   * Phân tích chuỗi phạm vi Unicode
    */
   parseUnicodeRange(rangeStr) {
     const ranges = []
@@ -336,7 +336,7 @@ class BrowserFontConverter {
         const [start, end] = trimmed.split('-')
         const startCode = this.parseHexOrDec(start)
         const endCode = this.parseHexOrDec(end)
-        
+
         if (startCode !== null && endCode !== null) {
           ranges.push(startCode, endCode, startCode)
         }
@@ -352,7 +352,7 @@ class BrowserFontConverter {
   }
 
   /**
-   * 解析十六进制或十进制数字
+   * Phân tích số thập lục phân hoặc thập phân
    */
   parseHexOrDec(str) {
     const trimmed = str.trim()
@@ -367,12 +367,12 @@ class BrowserFontConverter {
   }
 
   /**
-   * 估算输出大小 - 异步版本
+   * Ước lượng kích thước đầu ra - phiên bản bất đồng bộ
    */
   async estimateSizeAsync(options) {
     const { fontSize = 20, bpp = 4, charset = 'latin', symbols = '', range = '' } = options
     
-    // 计算字符数量
+  // Tính số lượng ký tự
     let charCount = symbols.length
     
     if (charset && charset !== 'custom') {
@@ -387,10 +387,10 @@ class BrowserFontConverter {
       }
     }
     
-    // 去重字符数（粗略估算）
+  // Loại trùng ký tự (ước lượng thô)
     charCount = Math.min(charCount, charCount * 0.8)
     
-    // 估算每个字符的字节数
+  // Ước tính số byte trung bình cho mỗi ký tự
     const avgBytesPerChar = Math.ceil((fontSize * fontSize * bpp) / 8) + 40
     
     const estimatedSize = charCount * avgBytesPerChar + 2048 // 加上头部和索引
@@ -404,12 +404,12 @@ class BrowserFontConverter {
   }
 
   /**
-   * 估算输出大小 - 同步版本（向后兼容）
+   * Ước lượng kích thước đầu ra - phiên bản đồng bộ (tương thích)
    */
   estimateSize(options) {
     const { fontSize = 20, bpp = 4, charset = 'latin', symbols = '', range = '' } = options
     
-    // 计算字符数量
+  // Tính số lượng ký tự
     let charCount = symbols.length
     
     if (charset && charset !== 'custom') {
@@ -424,10 +424,10 @@ class BrowserFontConverter {
       }
     }
     
-    // 去重字符数（粗略估算）
+  // Loại trùng ký tự (ước lượng thô)
     charCount = Math.min(charCount, charCount * 0.8)
     
-    // 估算每个字符的字节数
+  // Ước tính số byte trung bình cho mỗi ký tự
     const avgBytesPerChar = Math.ceil((fontSize * fontSize * bpp) / 8) + 40
     
     const estimatedSize = charCount * avgBytesPerChar + 2048 // 加上头部和索引
@@ -441,7 +441,7 @@ class BrowserFontConverter {
   }
 
   /**
-   * 格式化字节大小
+   * Định dạng kích thước byte
    */
   formatBytes(bytes) {
     if (bytes === 0) return '0 Bytes'
@@ -454,15 +454,16 @@ class BrowserFontConverter {
   }
 
   /**
-   * 清理资源
+   * Dọn dẹp tài nguyên
    */
   cleanup() {
     // 清理可能的资源引用
+    // Dọn các tham chiếu tài nguyên có thể có
     this.initialized = false
   }
 }
 
-// 创建单例实例
+// Tạo thể hiện đơn lẻ
 const browserFontConverter = new BrowserFontConverter()
 
 export default browserFontConverter

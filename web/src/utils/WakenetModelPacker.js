@@ -1,33 +1,33 @@
 /**
- * WakenetModelPacker 类
- * 模仿 pack_model.py 的功能，用于在浏览器端打包唤醒词模型
- * 
- * 注意：已修复与Python版本的兼容性问题：
- * - 使用ASCII编码而非UTF-8编码
- * - 确保小端序整数格式一致
- * - 移除冗余的字符串替换操作
- * 
- * 打包格式：
+ * Lớp WakenetModelPacker
+ * Mô phỏng chức năng của pack_model.py, dùng để đóng gói mô hình wake word trên trình duyệt
+ *
+ * Lưu ý: đã sửa các vấn đề tương thích với phiên bản Python:
+ * - Sử dụng mã ASCII thay vì UTF-8
+ * - Đảm bảo định dạng số nguyên theo little-endian nhất quán
+ * - Loại bỏ các thao tác thay thế chuỗi thừa
+ *
+ * Định dạng đóng gói:
  * {
- *     model_num: int (4字节)
+ *     model_num: int (4 byte)
  *     model1_info: model_info_t
  *     model2_info: model_info_t
  *     ...
- *     model1数据
- *     model2数据
+ *     dữ liệu_model1
+ *     dữ liệu_model2
  *     ...
  * }
- * 
- * model_info_t格式：
+ *
+ * model_info_t có cấu trúc:
  * {
- *     model_name: char[32] (32字节)
- *     file_number: int (4字节)
- *     file1_name: char[32] (32字节)
- *     file1_start: int (4字节)  
- *     file1_len: int (4字节)
- *     file2_name: char[32] (32字节)
- *     file2_start: int (4字节)   
- *     file2_len: int (4字节)
+ *     model_name: char[32] (32 byte)
+ *     file_number: int (4 byte)
+ *     file1_name: char[32] (32 byte)
+ *     file1_start: int (4 byte)
+ *     file1_len: int (4 byte)
+ *     file2_name: char[32] (32 byte)
+ *     file2_start: int (4 byte)
+ *     file2_len: int (4 byte)
  *     ...
  * }
  */
@@ -57,7 +57,7 @@ class WakenetModelPacker {
    */
   async loadModelFromShare(modelName) {
     try {
-      // 所有wakenet模型都使用相同的文件名
+  // Tất cả mô hình wakenet đều dùng cùng một danh sách tên tệp
       const modelFiles = [
         '_MODEL_INFO_',
         'wn9_data',
@@ -73,16 +73,16 @@ class WakenetModelPacker {
             this.addModelFile(modelName, fileName, fileData)
             loadedFiles++
           } else {
-            console.warn(`无法加载文件: ${fileName}, status: ${response.status}`)
+    console.warn(`Không thể tải tệp: ${fileName}, mã trạng thái: ${response.status}`)
           }
         } catch (error) {
-          console.warn(`加载文件失败: ${fileName}`, error)
+      console.warn(`Tải tệp thất bại: ${fileName}`, error)
         }
       }
 
       return loadedFiles === modelFiles.length
     } catch (error) {
-      console.error(`加载模型失败: ${modelName}`, error)
+  console.error(`Tải mô hình thất bại: ${modelName}`, error)
       return false
     }
   }
@@ -97,8 +97,8 @@ class WakenetModelPacker {
   packString(string, maxLen) {
     const bytes = new Uint8Array(maxLen)
     
-    // 使用ASCII编码，与Python版本保持一致
-    // 不预留null终止符空间，完整使用maxLen字节
+  // Sử dụng mã ASCII, giữ tương thích với phiên bản Python
+  // Không dành chỗ cho ký tự null kết thúc, sử dụng đầy đủ maxLen byte
     const copyLen = Math.min(string.length, maxLen)
     
     for (let i = 0; i < copyLen; i++) {
@@ -106,7 +106,7 @@ class WakenetModelPacker {
       bytes[i] = string.charCodeAt(i) & 0xFF
     }
     
-    // 剩余字节保持为0（默认初始化值）
+    // Các byte còn lại giữ giá trị 0 (giá trị khởi tạo mặc định)
     return bytes
   }
 
@@ -131,14 +131,14 @@ class WakenetModelPacker {
    */
   packModels() {
     if (this.models.size === 0) {
-      throw new Error('没有模型数据可打包')
+      throw new Error('Không có dữ liệu mô hình để đóng gói')
     }
 
     // 计算所有文件的总数和数据
     let totalFileNum = 0
     const modelDataList = []
     
-    // 按模型名排序遍历
+    // Duyệt theo thứ tự tên mô hình
     for (const [modelName, files] of Array.from(this.models.entries()).sort((a, b) => a[0].localeCompare(b[0]))) {
       totalFileNum += files.size
       // 按文件名排序，确保与Python版本顺序一致
@@ -149,16 +149,16 @@ class WakenetModelPacker {
       })
     }
 
-    // 计算头部长度: 模型数量(4) + 每个模型信息(32+4+文件数*(32+4+4))
+    // Tính độ dài header: số mô hình (4) + mỗi model info (32+4 + số_tệp*(32+4+4))
     const modelNum = this.models.size
     let headerLen = 4 // model_num
     
     for (const model of modelDataList) {
       headerLen += 32 + 4 // model_name + file_number
-      headerLen += model.files.length * (32 + 4 + 4) // 每个文件的 name + start + len
+      headerLen += model.files.length * (32 + 4 + 4) // mỗi tệp: name + start + len
     }
 
-    // 创建输出缓冲区
+  // Tạo bộ nhớ đệm đầu ra
     const totalSize = headerLen + Array.from(this.models.values())
       .reduce((total, files) => total + Array.from(files.values())
         .reduce((fileTotal, fileData) => fileTotal + fileData.byteLength, 0), 0)
@@ -166,23 +166,23 @@ class WakenetModelPacker {
     const output = new Uint8Array(totalSize)
     let offset = 0
 
-    // 写入模型数量
+  // Ghi số lượng mô hình
     output.set(this.packUint32(modelNum), offset)
     offset += 4
 
-    // 写入模型信息头
+  // Ghi phần header thông tin mô hình
     let dataOffset = headerLen
     
     for (const model of modelDataList) {
-      // 写入模型名称
+      // Ghi tên mô hình
       output.set(this.packString(model.name, 32), offset)
       offset += 32
       
-      // 写入文件数量
+      // Ghi số lượng tệp
       output.set(this.packUint32(model.files.length), offset)
       offset += 4
 
-      // 写入每个文件的信息
+      // Ghi thông tin cho mỗi tệp
       for (const [fileName, fileData] of model.files) {
         // 文件名
         output.set(this.packString(fileName, 32), offset)
@@ -200,7 +200,7 @@ class WakenetModelPacker {
       }
     }
 
-    // 写入文件数据
+    // Ghi dữ liệu các tệp
     for (const model of modelDataList) {
       for (const [fileName, fileData] of model.files) {
         output.set(new Uint8Array(fileData), offset)
@@ -242,7 +242,7 @@ class WakenetModelPacker {
         WakeNet9s: wn9sModels
       }
     } catch (error) {
-      console.error('获取模型列表失败:', error)
+      console.error('Lấy danh sách mô hình thất bại:', error)
       return { WakeNet9: [], WakeNet9s: [] }
     }
   }
@@ -256,6 +256,7 @@ class WakenetModelPacker {
   static isValidModel(modelName, chipModel) {
     const isC3OrC6 = chipModel === 'esp32c3' || chipModel === 'esp32c6'
     
+    // Nếu là chip esp32c3/esp32c6 thì dùng model wn9s_
     if (isC3OrC6) {
       return modelName.startsWith('wn9s_')
     } else {
@@ -299,11 +300,11 @@ class WakenetModelPacker {
    * @returns {Object} 验证结果
    */
   validatePackingCompatibility() {
-    // 测试字符串打包
+    // Kiểm tra đóng gói chuỗi
     const testString = "test_model"
     const packedString = this.packString(testString, 32)
     
-    // 测试整数打包
+    // Kiểm tra đóng gói số nguyên
     const testInt = 0x12345678
     const packedInt = this.packUint32(testInt)
     

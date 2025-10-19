@@ -1,30 +1,30 @@
 <template>
   <div class="space-y-6">
     <div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">唤醒词配置</h3>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Cấu hình từ đánh thức</h3>
       <p class="text-gray-600">
-        根据您的芯片型号选择合适的唤醒词模型。
+        Chọn mô hình từ đánh thức phù hợp theo loại chip của bạn.
         <span v-if="chipModel.includes('c3') || chipModel.includes('c6')" class="text-blue-600">
-          您的芯片支持 WakeNet9s 模型。
+          Chip của bạn hỗ trợ mô hình WakeNet9s.
         </span>
         <span v-else class="text-blue-600">
-          您的芯片支持 WakeNet9 模型。
+          Chip của bạn hỗ trợ mô hình WakeNet9.
         </span>
       </p>
     </div>
 
-    <!-- 唤醒词选择 -->
+    <!-- Lựa chọn từ đánh thức -->
     <div class="space-y-4">
-      <label class="block text-sm font-medium text-gray-700">选择唤醒词</label>
+      <label class="block text-sm font-medium text-gray-700">Chọn từ đánh thức</label>
       
-      <!-- 下拉选择 -->
+      <!-- Menu thả xuống -->
       <div class="relative">
         <select 
           :value="modelValue"
           @change="selectWakeword($event.target.value)"
           class="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         >
-          <option value="">请选择唤醒词（可选）</option>
+          <option value="">Vui lòng chọn từ đánh thức (tùy chọn)</option>
           <option
             v-for="wakeword in availableWakewords"
             :key="wakeword.id"
@@ -35,7 +35,7 @@
         </select>
       </div>
 
-      <!-- 当前选择显示 -->
+      <!-- Hiển thị lựa chọn hiện tại -->
       <div v-if="modelValue" class="bg-green-50 border border-green-200 rounded-lg p-4">
         <div class="flex">
           <div class="flex-shrink-0">
@@ -45,26 +45,26 @@
           </div>
           <div class="ml-3">
             <h4 class="text-sm font-medium text-green-800">
-              已选择唤醒词: {{ getSelectedWakewordName() }}
+              Đã chọn từ đánh thức: {{ getSelectedWakewordName() }}
             </h4>
             <div class="mt-1 text-sm text-green-700">
-              模型类型: {{ getSelectedWakewordModel() }}
+              Loại mô hình: {{ getSelectedWakewordModel() }}
             </div>
             <div class="mt-1 text-sm text-green-700">
-              文件名: {{ modelValue }}.bin
+              Tên tệp: {{ modelValue }}.bin
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 提示信息 -->
+      <!-- Thông tin hướng dẫn -->
       <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
         <div class="text-sm text-blue-800">
-          <strong>提示：</strong>
+          <strong>Lưu ý:</strong>
           <ul class="mt-1 list-disc list-inside space-y-1">
-            <li>唤醒词是可选的，不配置唤醒词时设备将无法语音唤醒</li>
-            <li>{{ chipModel.includes('c3') || chipModel.includes('c6') ? 'C3/C6 芯片仅支持 WakeNet9s 轻量级模型' : 'S3/P4 芯片支持完整的 WakeNet9 模型，选择更多' }}</li>
-            <li>选择后可随时更改或取消选择</li>
+            <li>Từ đánh thức là tùy chọn, nếu không cấu hình thì thiết bị sẽ không thể đánh thức bằng giọng nói</li>
+            <li>{{ chipModel.includes('c3') || chipModel.includes('c6') ? 'Chip C3/C6 chỉ hỗ trợ mô hình nhẹ WakeNet9s' : 'Chip S3/P4 hỗ trợ mô hình đầy đủ WakeNet9, nhiều lựa chọn hơn' }}</li>
+            <li>Có thể thay đổi hoặc hủy lựa chọn bất cứ lúc nào</li>
           </ul>
         </div>
       </div>
@@ -88,15 +88,15 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-// 完整的唤醒词配置数据
+// Dữ liệu cấu hình từ đánh thức đầy đủ
 const wakewordData = [
-  // WakeNet9s (C3/C6 芯片支持)
+  // WakeNet9s (Hỗ trợ chip C3/C6)
   { id: 'wn9s_hilexin', name: 'Hi,乐鑫', model: 'WakeNet9s' },
   { id: 'wn9s_hiesp', name: 'Hi,ESP', model: 'WakeNet9s' },
   { id: 'wn9s_nihaoxiaozhi', name: '你好小智', model: 'WakeNet9s' },
   { id: 'wn9s_hijason_tts2', name: 'Hi,Jason', model: 'WakeNet9s' },
   
-  // WakeNet9 (S3/P4 芯片支持)
+  // WakeNet9 (Hỗ trợ chip S3/P4)
   { id: 'wn9_hilexin', name: 'Hi,乐鑫', model: 'WakeNet9' },
   { id: 'wn9_hiesp', name: 'Hi,ESP', model: 'WakeNet9' },
   { id: 'wn9_nihaoxiaozhi_tts', name: '你好小智', model: 'WakeNet9' },
@@ -155,13 +155,13 @@ const availableWakewords = computed(() => {
 })
 
 const selectWakeword = (id) => {
-  // 如果选择的是空值，清除选择
+  // Nếu chọn giá trị rỗng, xóa lựa chọn
   if (id === '') {
     emit('update:modelValue', '')
     return
   }
   
-  // 如果点击的是已选中的唤醒词，则取消选中
+  // Nếu click vào từ đánh thức đã chọn, hủy chọn
   if (props.modelValue === id) {
     emit('update:modelValue', '')
   } else {

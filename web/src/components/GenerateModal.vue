@@ -1,9 +1,9 @@
 <template>
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-      <!-- 模态框头部 -->
+  <!-- Phần tiêu đề modal -->
       <div class="flex items-center justify-between p-6 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">生成 assets.bin</h3>
+  <h3 class="text-lg font-medium text-gray-900">Tạo assets.bin</h3>
         <button
           @click="$emit('close')"
           class="text-gray-400 hover:text-gray-500"
@@ -14,39 +14,39 @@
         </button>
       </div>
 
-      <!-- 模态框内容 -->
+  <!-- Nội dung modal -->
       <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px)">
         <div v-if="!isGenerating && !isCompleted" class="space-y-6">
-          <!-- 配置确认 -->
+          <!-- Xác nhận cấu hình -->
           <div>
-            <h4 class="font-medium text-gray-900 mb-3">请确认您的配置</h4>
+            <h4 class="font-medium text-gray-900 mb-3">Vui lòng xác nhận cấu hình của bạn</h4>
             <div class="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
               <div class="flex justify-between">
-                <span class="text-gray-600">芯片型号:</span>
+                <span class="text-gray-600">Mã chip:</span>
                 <span class="font-medium">{{ config.chip.model.toUpperCase() }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">分辨率:</span>
+                <span class="text-gray-600">Độ phân giải:</span>
                 <span class="font-medium">{{ config.chip.display.width }}×{{ config.chip.display.height }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">唤醒词:</span>
+                <span class="text-gray-600">Từ đánh thức:</span>
                 <span class="font-medium">{{ getWakewordName() }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">字体:</span>
+                <span class="text-gray-600">Phông chữ:</span>
                 <span class="font-medium">{{ getFontName() }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">表情包:</span>
+                <span class="text-gray-600">Gói biểu cảm:</span>
                 <span class="font-medium">{{ getEmojiName() }}</span>
               </div>
             </div>
           </div>
 
-          <!-- 文件列表 -->
+          <!-- Danh sách tập tin -->
           <div>
-            <h4 class="font-medium text-gray-900 mb-3">包含的文件列表</h4>
+            <h4 class="font-medium text-gray-900 mb-3">Danh sách tập tin bao gồm</h4>
             <div class="space-y-2 max-h-64 overflow-y-auto">
               <div
                 v-for="item in fileList"
@@ -59,21 +59,22 @@
                 </div>
                 <div class="text-sm text-gray-700">
                   {{ item.size }}
-                  <span v-if="item.estimated" class="text-xs text-gray-500 ml-1">预估</span>
+                  <span v-if="item.estimated" class="text-xs text-gray-500 ml-1">Ước tính</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 生成进度 -->
+  <!-- Tiến trình tạo -->
         <div v-if="isGenerating" class="space-y-6 text-center">
+          <!-- Tiến trình tạo -->
           <div class="flex items-center justify-center">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500"></div>
           </div>
           
           <div class="space-y-4">
-            <p class="text-gray-600 mt-2">正在生成 assets.bin</p>
+            <p class="text-gray-600 mt-2">Đang tạo assets.bin</p>
             <div class="bg-gray-200 rounded-full h-2 overflow-hidden">
               <div 
                 class="bg-primary-500 h-2 rounded-full transition-all duration-500 ease-out"
@@ -82,11 +83,11 @@
             </div>
             <div class="text-sm text-gray-600">
               <div>{{ currentStep }}</div>
-              <div class="mt-1">{{ progress }}% 完成</div>
+              <div class="mt-1">{{ progress }}% hoàn thành</div>
             </div>
           </div>
 
-          <!-- 进度步骤 -->
+          <!-- Các bước tiến trình -->
           <div class="space-y-2 text-left">
             <div
               v-for="step in progressSteps"
@@ -113,6 +114,7 @@
 
         <!-- 完成状态 -->
         <div v-if="isCompleted && !isFlashing" class="text-center space-y-6">
+          <!-- Trạng thái hoàn thành -->
           <div class="mx-auto flex items-center justify-center">
             <svg class="w-20 h-20 text-green-600" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -120,14 +122,14 @@
           </div>
           
           <div>
-            <p class="text-gray-600 mt-2">您的 assets.bin 文件已准备就绪</p>
+            <p class="text-gray-600 mt-2">Tệp assets.bin của bạn đã sẵn sàng</p>
           </div>
 
           <div class="bg-green-50 border border-green-200 rounded-lg p-4">
             <div class="text-sm text-green-800 space-y-1">
-              <div>文件名: assets.bin</div>
-              <div>文件大小: {{ generatedFileSize }}</div>
-              <div>生成时间: {{ generationTime }}</div>
+              <div>Tên tệp: assets.bin</div>
+              <div>Kích thước tệp: {{ generatedFileSize }}</div>
+              <div>Thời gian tạo: {{ generationTime }}</div>
             </div>
           </div>
 
@@ -139,7 +141,7 @@
               <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
               </svg>
-              下载 assets.bin
+              Tải xuống assets.bin
             </button>
 
             <button
@@ -150,19 +152,20 @@
               <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
               </svg>
-              在线烧录到设备
+              Ghi trực tuyến lên thiết bị
             </button>
           </div>
         </div>
 
-        <!-- 在线烧录进度 -->
+  <!-- Tiến trình ghi trực tuyến -->
         <div v-if="isFlashing" class="space-y-6 text-center">
+          <!-- Tiến trình ghi trực tuyến -->
           <div class="flex items-center justify-center">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
           </div>
 
           <div class="space-y-4">
-            <p class="text-gray-600">正在烧录到设备</p>
+            <p class="text-gray-600">Đang ghi vào thiết bị</p>
             <div class="bg-gray-200 rounded-full h-2 overflow-hidden">
               <div
                 class="bg-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
@@ -171,28 +174,28 @@
             </div>
             <div class="text-sm text-gray-600">
               <div>{{ flashCurrentStep }}</div>
-              <div class="mt-1">{{ flashProgress }}% 完成</div>
+              <div class="mt-1">{{ flashProgress }}% hoàn thành</div>
             </div>
           </div>
 
-          <!-- 取消按钮 -->
+          <!-- Nút hủy -->
           <button
             @click="cancelFlash"
             class="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
           >
-            取消烧录
+            Hủy ghi
           </button>
         </div>
       </div>
 
-      <!-- 模态框底部 -->
+  <!-- Phần chân modal -->
       <div class="flex justify-end space-x-3 p-6 border-t border-gray-200">
         <button
           v-if="!isGenerating && !isCompleted"
           @click="$emit('close')"
           class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
         >
-          取消
+          Hủy
         </button>
         <button
           v-if="!isGenerating && !isCompleted"
@@ -200,14 +203,14 @@
           :disabled="!hasSelectedFiles"
           class="px-6 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 rounded-md transition-colors"
         >
-          开始生成
+          Bắt đầu tạo
         </button>
         <button
           v-if="isCompleted"
           @click="$emit('close')"
           class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
         >
-          关闭
+          Đóng
         </button>
       </div>
     </div>
@@ -242,19 +245,19 @@ const flashCurrentStep = ref('')
 
 
 const progressSteps = ref([
-  { id: 1, name: '初始化生成器', status: 'pending' },
-  { id: 2, name: '处理字体文件', status: 'pending' },
-  { id: 3, name: '打包唤醒词模型', status: 'pending' },
-  { id: 4, name: '处理表情图片', status: 'pending' },
-  { id: 5, name: '处理背景图片', status: 'pending' },
-  { id: 6, name: '生成索引文件', status: 'pending' },
-  { id: 7, name: '构建SPIFFS映射', status: 'pending' },
-  { id: 8, name: '完成打包', status: 'pending' }
+  { id: 1, name: 'Khởi tạo bộ tạo', status: 'pending' },
+  { id: 2, name: 'Xử lý tệp phông chữ', status: 'pending' },
+  { id: 3, name: 'Đóng gói mô hình từ đánh thức', status: 'pending' },
+  { id: 4, name: 'Xử lý ảnh biểu cảm', status: 'pending' },
+  { id: 5, name: 'Xử lý ảnh nền', status: 'pending' },
+  { id: 6, name: 'Tạo tệp chỉ mục', status: 'pending' },
+  { id: 7, name: 'Xây dựng ánh xạ SPIFFS', status: 'pending' },
+  { id: 8, name: 'Hoàn tất đóng gói', status: 'pending' }
 ])
 
 const fileList = ref([])
 
-// 图标组件 - 使用render函数并用markRaw包装以避免响应式化
+// Thành phần biểu tượng - sử dụng hàm render và bọc bằng markRaw để tránh phản ứng
 const FileIcon = markRaw({
   render: () => h('svg', {
     fill: 'currentColor',
@@ -312,12 +315,12 @@ const hasSelectedFiles = computed(() => {
 })
 
 const getWakewordName = () => {
-  // 简化的唤醒词名称映射
+  // Ánh xạ tên từ đánh thức (đơn giản)
   const names = {
-    'wn9s_hilexin': 'Hi,乐鑫',
-    'wn9s_hiesp': 'Hi,ESP',
-    'wn9s_nihaoxiaozhi': '你好小智',
-    'wn9_nihaoxiaozhi_tts': '你好小智',
+    'wn9s_hilexin': 'Hi, LeXin',
+    'wn9s_hiesp': 'Hi, ESP',
+    'wn9s_nihaoxiaozhi': 'Xin chào XiaoZhi',
+    'wn9_nihaoxiaozhi_tts': 'Xin chào XiaoZhi',
     'wn9_alexa': 'Alexa'
   }
   return names[props.config.theme.wakeword] || props.config.theme.wakeword
@@ -327,44 +330,44 @@ const getFontName = () => {
   if (props.config.theme.font.type === 'preset') {
     return props.config.theme.font.preset.replace('font_', '').replace('_', ' ')
   }
-  return '自定义字体'
+  return 'Phông chữ tùy chỉnh'
 }
 
 const getEmojiName = () => {
   if (props.config.theme.emoji.type === 'preset' && props.config.theme.emoji.preset) {
     return props.config.theme.emoji.preset === 'twemoji32' ? 'Twemoji 32×32' : 'Twemoji 64×64'
   } else if (props.config.theme.emoji.type === 'custom') {
-    return '自定义表情包'
+    return 'Gói biểu cảm tùy chỉnh'
   }
-  return '未配置'
+  return 'Chưa cấu hình'
 }
 
 const initializeFileList = () => {
   fileList.value = []
 
-  // 添加索引文件
+  // Thêm tệp chỉ mục
   fileList.value.push({
     id: 'index',
     name: 'index.json',
-    description: '配置索引文件',
+    description: 'Tệp chỉ mục cấu hình',
     icon: FileIcon,
     iconColor: 'text-blue-500',
     size: '1KB'
   })
 
-  // 添加唤醒词模型（如果有配置）
+  // Thêm mô hình từ đánh thức (nếu được cấu hình)
   if (props.config.theme.wakeword) {
     fileList.value.push({
       id: 'srmodels',
       name: 'srmodels.bin',
-      description: '唤醒词模型',
+      description: 'Mô hình từ đánh thức',
       icon: MicIcon,
       iconColor: 'text-green-500',
       size: '~2.1MB'
     })
   }
 
-  // 添加字体文件
+  // Thêm tệp phông chữ
   if (props.config.theme.font.type === 'preset') {
     const fontSizes = {
       'font_puhui_deepseek_14_1': '180KB',
@@ -376,7 +379,7 @@ const initializeFileList = () => {
     fileList.value.push({
       id: 'font',
       name: `${props.config.theme.font.preset}.bin`,
-      description: '预设字体文件',
+  description: 'Tệp phông chữ preset',
       icon: FontIcon,
       iconColor: 'text-yellow-500',
       size: fontSizes[props.config.theme.font.preset] || '500KB'
@@ -388,7 +391,7 @@ const initializeFileList = () => {
     fileList.value.push({
       id: 'font',
       name: `font_custom_${custom.size}_${custom.bpp}.bin`,
-      description: '自定义字体文件',
+  description: 'Tệp phông chữ tùy chỉnh',
       icon: FontIcon,
       iconColor: 'text-yellow-500',
       size: estimatedSize > 1024 ? `${(estimatedSize/1024).toFixed(1)}MB` : `${Math.round(estimatedSize)}KB`,
@@ -396,7 +399,7 @@ const initializeFileList = () => {
     })
   }
 
-  // 添加表情文件
+  // Thêm tệp biểu cảm
   if (props.config.theme.emoji.type === 'preset' && props.config.theme.emoji.preset) {
     const emotionList = ['neutral', 'happy', 'laughing', 'funny', 'sad', 'angry', 'crying', 'loving', 'embarrassed', 'surprised', 'shocked', 'thinking', 'winking', 'cool', 'relaxed', 'delicious', 'kissy', 'confident', 'sleepy', 'silly', 'confused']
     const size = props.config.theme.emoji.preset === 'twemoji64' ? '3KB' : '1KB'
@@ -405,7 +408,7 @@ const initializeFileList = () => {
       fileList.value.push({
         id: `emoji_${emotion}`,
         name: `${emotion}.png`,
-        description: `${emotion}表情图片`,
+  description: `Ảnh biểu cảm: ${emotion}`,
         icon: ImageIcon,
         iconColor: 'text-pink-500',
         size: size
@@ -417,7 +420,7 @@ const initializeFileList = () => {
       fileList.value.push({
         id: `emoji_${emotion}`,
         name: file.name,
-        description: `${emotion}表情图片`,
+  description: `Ảnh biểu cảm: ${emotion}`,
         icon: ImageIcon,
         iconColor: 'text-pink-500',
         size: fileSizeKB > 1024 ? `${(fileSizeKB/1024).toFixed(1)}MB` : `${fileSizeKB}KB`
@@ -425,7 +428,7 @@ const initializeFileList = () => {
     })
   }
 
-  // 添加背景文件
+  // Thêm tệp nền
   if (props.config.theme.skin.light.backgroundType === 'image' && props.config.theme.skin.light.backgroundImage) {
     const { width, height } = props.config.chip.display
     const estimatedSize = Math.round(width * height * 2 / 1024) // RGB565
@@ -433,7 +436,7 @@ const initializeFileList = () => {
     fileList.value.push({
       id: 'bg_light',
       name: 'background_light.raw',
-      description: '浅色模式背景图片',
+  description: 'Hình nền chế độ sáng',
       icon: ImageIcon,
       iconColor: 'text-indigo-500',
       size: estimatedSize > 1024 ? `${(estimatedSize/1024).toFixed(1)}MB` : `${estimatedSize}KB`,
@@ -448,7 +451,7 @@ const initializeFileList = () => {
     fileList.value.push({
       id: 'bg_dark',
       name: 'background_dark.raw',
-      description: '深色模式背景图片',
+  description: 'Hình nền chế độ tối',
       icon: ImageIcon,
       iconColor: 'text-indigo-500',
       size: estimatedSize > 1024 ? `${(estimatedSize/1024).toFixed(1)}MB` : `${estimatedSize}KB`,
@@ -461,7 +464,7 @@ const getTotalSize = () => {
   let totalKB = 0
   
   fileList.value.forEach(file => {
-    const sizeStr = file.size.replace('~', '').replace('预估', '')
+    const sizeStr = file.size.replace('~', '').replace('预估', '').replace('Ước tính', '')
     if (sizeStr.includes('MB')) {
       totalKB += parseFloat(sizeStr.replace('MB', '')) * 1024
     } else {
@@ -542,14 +545,14 @@ const startGeneration = async () => {
     emit('generate', fileList.value.map(f => ({ id: f.id, name: f.name })))
     
   } catch (error) {
-    console.error('生成 assets.bin 失败:', error)
+  console.error('Tạo assets.bin thất bại:', error)
     
     // 重置状态
     isGenerating.value = false
     isCompleted.value = false
     
-    // 显示错误
-    alert(`生成失败: ${error.message}`)
+  // Hiển thị lỗi
+  alert(`Tạo thất bại: ${error.message}`)
   }
 }
 
@@ -565,11 +568,11 @@ const downloadFile = () => {
     document.body.removeChild(element)
     URL.revokeObjectURL(url)
   } else {
-    console.error('没有可下载的文件')
+  console.error('Không có tệp để tải xuống')
   }
 }
 
-// 检查设备在线状态
+// Kiểm tra trạng thái thiết bị trực tuyến
 const checkDeviceOnline = async () => {
   try {
     // 获取URL参数中的token
@@ -591,26 +594,26 @@ const checkDeviceOnline = async () => {
 
     deviceOnline.value = response.ok
   } catch (error) {
-    console.error('检查设备状态失败:', error)
+  console.error('Kiểm tra trạng thái thiết bị thất bại:', error)
     deviceOnline.value = false
   }
 }
 
-// 开始在线烧录
+// Bắt đầu ghi trực tuyến
 const startOnlineFlash = async () => {
   if (!generatedBlob.value) {
-    flashCurrentStep.value = '错误：没有可烧录的文件'
+  flashCurrentStep.value = 'Lỗi: không có tệp để ghi'
     return
   }
 
   if (!deviceOnline.value) {
-    flashCurrentStep.value = '错误：设备不在线，无法进行烧录'
+  flashCurrentStep.value = 'Lỗi: thiết bị không trực tuyến, không thể ghi'
     return
   }
 
   isFlashing.value = true
   flashProgress.value = 0
-  flashCurrentStep.value = '准备开始烧录...'
+  flashCurrentStep.value = 'Chuẩn bị bắt đầu ghi...'
 
   try {
     // 通知父组件开始在线烧录
@@ -623,23 +626,23 @@ const startOnlineFlash = async () => {
       onComplete: () => {
         isFlashing.value = false
         flashProgress.value = 100
-        flashCurrentStep.value = '烧录完成！'
+  flashCurrentStep.value = 'Ghi hoàn tất!'
       },
       onError: (error) => {
         isFlashing.value = false
-        flashCurrentStep.value = `烧录失败: ${error}`
+  flashCurrentStep.value = `Ghi thất bại: ${error}`
       }
     })
   } catch (error) {
     isFlashing.value = false
-    console.error('启动烧录失败:', error)
-    flashCurrentStep.value = `启动烧录失败: ${error.message}`
+  console.error('Khởi động ghi thất bại:', error)
+  flashCurrentStep.value = `Khởi động ghi thất bại: ${error.message}`
   }
 }
 
-// 取消烧录
+// Hủy ghi
 const cancelFlash = () => {
-  if (confirm('确定要取消烧录吗？')) {
+  if (confirm('Bạn có chắc muốn hủy ghi không?')) {
     isFlashing.value = false
     flashProgress.value = 0
     flashCurrentStep.value = ''

@@ -1,13 +1,13 @@
 /**
- * AssetsBuilder 类
- * 用于处理小智 AI 自定义主题的 assets.bin 打包生成
- * 
- * 主要功能：
- * - 配置验证和处理
- * - 生成 index.json 内容
- * - 管理资源文件
- * - 与后端 API 交互生成 assets.bin
- * - 集成浏览器端字体转换功能
+ * Lớp AssetsBuilder
+ * Dùng để xử lý và đóng gói file assets.bin cho chủ đề tùy chỉnh của XiaoZhi AI
+ *
+ * Chức năng chính:
+ * - Xác thực và xử lý cấu hình
+ * - Sinh nội dung index.json
+ * - Quản lý file tài nguyên
+ * - Tương tác với API phía máy chủ để tạo assets.bin
+ * - Tích hợp chức năng chuyển đổi font trong trình duyệt
  */
 
 import browserFontConverter from './font_conv/BrowserFontConverter.js'
@@ -19,63 +19,63 @@ import configStorage from './ConfigStorage.js'
 class AssetsBuilder {
   constructor() {
     this.config = null
-    this.resources = new Map() // 存储资源文件
-    this.tempFiles = [] // 临时文件列表
-    this.fontConverterBrowser = browserFontConverter // 浏览器端字体转换器
-    this.convertedFonts = new Map() // 缓存转换后的字体
-    this.wakenetPacker = new WakenetModelPacker() // 唤醒词模型打包器
-    this.spiffsGenerator = new SpiffsGenerator() // SPIFFS 生成器
+    this.resources = new Map() // Lưu trữ các file tài nguyên
+    this.tempFiles = [] // Danh sách file tạm
+    this.fontConverterBrowser = browserFontConverter // Bộ chuyển đổi font chạy trong trình duyệt
+    this.convertedFonts = new Map() // Cache các font đã chuyển đổi
+    this.wakenetPacker = new WakenetModelPacker() // Trình đóng gói mô hình wakeword
+    this.spiffsGenerator = new SpiffsGenerator() // Trình tạo SPIFFS
     this.gifScaler = new GifScaler({ 
       quality: 10, 
       debug: true,
-      scalingMode: 'auto'  // 自动选择最佳缩放模式
-    }) // GIF 缩放器
-    this.configStorage = configStorage // 配置存储管理器
-    this.autoSaveEnabled = true // 是否启用自动保存
+      scalingMode: 'auto'  // Tự động chọn chế độ scale phù hợp
+    }) // Bộ xử lý GIF
+    this.configStorage = configStorage // Quản lý lưu trữ cấu hình
+    this.autoSaveEnabled = true // Bật/tắt tự động lưu
   }
 
   /**
-   * 设置配置对象
-   * @param {Object} config - 完整的配置对象
+   * Thiết lập đối tượng cấu hình
+   * @param {Object} config - Đối tượng cấu hình đầy đủ
    */
   setConfig(config, options = {}) {
     const strict = options?.strict ?? true
     if (strict && !this.validateConfig(config)) {
-      throw new Error('配置对象验证失败')
+  throw new Error('Xác thực đối tượng cấu hình thất bại')
     }
     this.config = { ...config }
     return this
   }
 
   /**
-   * 验证配置对象
-   * @param {Object} config - 待验证的配置对象
-   * @returns {boolean} 验证结果
+   * Xác thực đối tượng cấu hình
+   * @param {Object} config - Đối tượng cấu hình cần xác thực
+   * @returns {boolean} Kết quả xác thực
    */
   validateConfig(config) {
     if (!config) return false
     
-    // 验证芯片配置
+  // Xác thực cấu hình chip
     if (!config.chip?.model) {
-      console.error('缺少芯片型号配置')
+      console.error('Thiếu cấu hình model chip')
       return false
     }
 
-    // 验证显示配置
+  // Xác thực cấu hình hiển thị
     const display = config.chip.display
     if (!display?.width || !display?.height) {
-      console.error('缺少显示分辨率配置')
+      console.error('Thiếu cấu hình độ phân giải hiển thị')
       return false
     }
 
-    // 验证字体配置
+  // Xác thực cấu hình font
     const font = config.theme?.font
     if (font?.type === 'preset' && !font.preset) {
-      console.error('预设字体配置不完整')
+      console.error('Cấu hình font preset chưa đầy đủ')
       return false
     }
     if (font?.type === 'custom' && !font.custom?.file) {
-      console.error('自定义字体文件未提供')
+      console.error('Chưa cung cấp file font tùy chỉnh')
       return false
     }
 
@@ -83,11 +83,11 @@ class AssetsBuilder {
   }
 
   /**
-   * 添加资源文件
-   * @param {string} key - 资源键名
-   * @param {File|Blob} file - 文件对象
-   * @param {string} filename - 文件名
-   * @param {string} resourceType - 资源类型 (font, emoji, background)
+  * Thêm file tài nguyên
+  * @param {string} key - Khóa tài nguyên
+  * @param {File|Blob} file - Đối tượng file
+  * @param {string} filename - Tên file
+  * @param {string} resourceType - Loại tài nguyên (font, emoji, background)
    */
   addResource(key, file, filename, resourceType = 'other') {
     this.resources.set(key, {
@@ -99,10 +99,10 @@ class AssetsBuilder {
       resourceType
     })
 
-    // 自动保存文件到存储
-    if (this.autoSaveEnabled && file instanceof File) {
+  // Tự động lưu file vào storage
+  if (this.autoSaveEnabled && file instanceof File) {
       this.saveFileToStorage(key, file, resourceType).catch(error => {
-        console.warn(`自动保存文件 ${filename} 失败:`, error)
+    console.warn(`Tự động lưu file ${filename} thất bại:`, error)
       })
     }
 
@@ -110,26 +110,26 @@ class AssetsBuilder {
   }
 
   /**
-   * 保存文件到存储
-   * @param {string} key - 资源键名
-   * @param {File} file - 文件对象
-   * @param {string} resourceType - 资源类型
-   * @returns {Promise<void>}
+  * Lưu file vào storage
+  * @param {string} key - Khóa tài nguyên
+  * @param {File} file - Đối tượng file
+  * @param {string} resourceType - Loại tài nguyên
+  * @returns {Promise<void>}
    */
   async saveFileToStorage(key, file, resourceType) {
     try {
       await this.configStorage.saveFile(key, file, resourceType)
-      console.log(`文件 ${file.name} 已自动保存到存储`)
+  console.log(`File ${file.name} đã được tự động lưu vào storage`)
     } catch (error) {
-      console.error(`保存文件到存储失败: ${file.name}`, error)
+  console.error(`Lưu file vào storage thất bại: ${file.name}`, error)
       throw error
     }
   }
 
   /**
-   * 从存储中恢复资源文件
-   * @param {string} key - 资源键名
-   * @returns {Promise<boolean>} 是否成功恢复
+   * Khôi phục file tài nguyên từ storage
+   * @param {string} key - Khóa tài nguyên
+   * @returns {Promise<boolean>} Có khôi phục được hay không
    */
   async restoreResourceFromStorage(key) {
     try {
@@ -144,19 +144,19 @@ class AssetsBuilder {
           resourceType: file.storedType,
           fromStorage: true
         })
-        console.log(`资源 ${key} 从存储恢复成功: ${file.name}`)
+        console.log(`Tài nguyên ${key} đã phục hồi thành công từ storage: ${file.name}`)
         return true
       }
       return false
     } catch (error) {
-      console.error(`从存储恢复资源失败: ${key}`, error)
+      console.error(`Khôi phục tài nguyên từ storage thất bại: ${key}`, error)
       return false
     }
   }
 
   /**
-   * 恢复所有相关的资源文件
-   * @param {Object} config - 配置对象
+   * Khôi phục tất cả file tài nguyên liên quan từ storage
+   * @param {Object} config - Đối tượng cấu hình
    * @returns {Promise<void>}
    */
   async restoreAllResourcesFromStorage(config) {
@@ -164,19 +164,19 @@ class AssetsBuilder {
 
     const restoredFiles = []
 
-    // 恢复自定义字体文件
+  // Khôi phục font tùy chỉnh
     if (config.theme?.font?.type === 'custom' && config.theme.font.custom?.file === null) {
       const fontKey = 'custom_font'
       if (await this.restoreResourceFromStorage(fontKey)) {
         const resource = this.resources.get(fontKey)
         if (resource) {
           config.theme.font.custom.file = resource.file
-          restoredFiles.push(`自定义字体: ${resource.filename}`)
+      restoredFiles.push(`Font tùy chỉnh: ${resource.filename}`)
         }
       }
     }
 
-    // 恢复自定义表情图片
+  // Khôi phục ảnh emoji tùy chỉnh
     if (config.theme?.emoji?.type === 'custom' && config.theme.emoji.custom?.images) {
       for (const [emojiName, file] of Object.entries(config.theme.emoji.custom.images)) {
         if (file === null) {
@@ -185,21 +185,21 @@ class AssetsBuilder {
             const resource = this.resources.get(emojiKey)
             if (resource) {
               config.theme.emoji.custom.images[emojiName] = resource.file
-              restoredFiles.push(`表情 ${emojiName}: ${resource.filename}`)
+        restoredFiles.push(`Biểu cảm ${emojiName}: ${resource.filename}`)
             }
           }
         }
       }
     }
 
-    // 恢复背景图片
+  // Khôi phục ảnh nền
     if (config.theme?.skin?.light?.backgroundType === 'image' && config.theme.skin.light.backgroundImage === null) {
       const bgKey = 'background_light'
       if (await this.restoreResourceFromStorage(bgKey)) {
         const resource = this.resources.get(bgKey)
         if (resource) {
           config.theme.skin.light.backgroundImage = resource.file
-          restoredFiles.push(`浅色背景: ${resource.filename}`)
+      restoredFiles.push(`Nền sáng: ${resource.filename}`)
         }
       }
     }
@@ -210,12 +210,12 @@ class AssetsBuilder {
         const resource = this.resources.get(bgKey)
         if (resource) {
           config.theme.skin.dark.backgroundImage = resource.file
-          restoredFiles.push(`深色背景: ${resource.filename}`)
+      restoredFiles.push(`Nền tối: ${resource.filename}`)
         }
       }
     }
 
-    // 恢复转换后的字体数据
+  // Khôi phục dữ liệu font đã chuyển đổi
     try {
       const fontInfo = this.getFontInfo()
       if (fontInfo && fontInfo.type === 'custom') {
@@ -223,21 +223,21 @@ class AssetsBuilder {
         const tempData = await this.configStorage.loadTempData(tempKey)
         if (tempData) {
           this.convertedFonts.set(fontInfo.filename, tempData.data)
-          console.log(`转换后的字体数据已恢复: ${fontInfo.filename}`)
+      console.log(`Dữ liệu font đã chuyển đổi đã phục hồi: ${fontInfo.filename}`)
         }
       }
     } catch (error) {
-      console.warn('恢复转换后的字体数据时出错:', error)
+    console.warn('Lỗi khi khôi phục dữ liệu font đã chuyển đổi:', error)
     }
 
     if (restoredFiles.length > 0) {
-      console.log('已从存储恢复的文件:', restoredFiles)
+    console.log('Các file đã được khôi phục từ storage:', restoredFiles)
     }
   }
 
   /**
-   * 获取唤醒词模型信息
-   * @returns {Object|null} 唤醒词模型信息
+   * Lấy thông tin mô hình wakeword
+   * @returns {Object|null} Thông tin mô hình wakeword
    */
   getWakewordModelInfo() {
     if (!this.config || !this.config.chip || !this.config.theme) {
@@ -249,7 +249,7 @@ class AssetsBuilder {
     
     if (!wakeword) return null
 
-    // 根据芯片型号确定唤醒词模型类型
+  // Xác định kiểu mô hình wakeword theo model chip
     const isC3OrC6 = chipModel === 'esp32c3' || chipModel === 'esp32c6'
     const modelType = isC3OrC6 ? 'WakeNet9s' : 'WakeNet9'
     
@@ -261,8 +261,8 @@ class AssetsBuilder {
   }
 
   /**
-   * 获取字体信息
-   * @returns {Object|null} 字体信息
+   * Lấy thông tin font
+   * @returns {Object|null} Thông tin font
    */
   getFontInfo() {
     if (!this.config || !this.config.theme || !this.config.theme.font) {
@@ -299,8 +299,8 @@ class AssetsBuilder {
   }
 
   /**
-   * 获取表情集合信息
-   * @returns {Array} 表情集合信息数组
+   * Lấy thông tin bộ emoji
+   * @returns {Array} Mảng thông tin emoji
    */
   getEmojiCollectionInfo() {
     if (!this.config || !this.config.theme || !this.config.theme.emoji) {
@@ -311,7 +311,7 @@ class AssetsBuilder {
     const collection = []
     
     if (emoji.type === 'preset') {
-      // 预设表情包
+  // Gói emoji preset
       const presetEmojis = [
         'neutral', 'happy', 'laughing', 'funny', 'sad', 'angry', 'crying',
         'loving', 'embarrassed', 'surprised', 'shocked', 'thinking', 'winking',
@@ -328,13 +328,13 @@ class AssetsBuilder {
         })
       })
     } else if (emoji.type === 'custom') {
-      // 自定义表情包
+      // Gói emoji tùy chỉnh
       const images = emoji.custom.images || {}
       const size = emoji.custom.size || { width: 64, height: 64 }
       
       Object.entries(images).forEach(([name, file]) => {
         if (file) {
-          // 根据实际文件扩展名生成文件名
+              // Tạo tên file dựa trên phần mở rộng thực tế
           const fileExtension = file.name ? file.name.split('.').pop().toLowerCase() : 'png'
           collection.push({
             name,
@@ -345,9 +345,9 @@ class AssetsBuilder {
         }
       })
       
-      // 确保至少有 neutral 表情
+      // Đảm bảo có ít nhất emoji 'neutral'
       if (!collection.find(item => item.name === 'neutral')) {
-        console.warn('警告：未提供 neutral 表情，将使用默认图片')
+        console.warn('Cảnh báo: chưa cung cấp emoji neutral, sẽ dùng ảnh mặc định')
       }
     }
     
@@ -355,8 +355,8 @@ class AssetsBuilder {
   }
 
   /**
-   * 获取皮肤配置信息
-   * @returns {Object} 皮肤配置信息
+   * Lấy cấu hình skin
+   * @returns {Object} Thông tin skin
    */
   getSkinInfo() {
     if (!this.config || !this.config.theme || !this.config.theme.skin) {
@@ -366,7 +366,7 @@ class AssetsBuilder {
     const skin = this.config.theme.skin
     const result = {}
     
-    // 处理浅色模式
+  // Xử lý chế độ sáng
     if (skin.light) {
       result.light = {
         text_color: skin.light.textColor || '#000000',
@@ -378,7 +378,7 @@ class AssetsBuilder {
       }
     }
     
-    // 处理深色模式  
+  // Xử lý chế độ tối
     if (skin.dark) {
       result.dark = {
         text_color: skin.dark.textColor || '#ffffff',
@@ -394,12 +394,12 @@ class AssetsBuilder {
   }
 
   /**
-   * 生成 index.json 内容
-   * @returns {Object} index.json 对象
+   * Sinh nội dung index.json
+   * @returns {Object} Đối tượng index.json
    */
   generateIndexJson() {
     if (!this.config) {
-      throw new Error('配置对象未设置')
+  throw new Error('Đối tượng cấu hình chưa được thiết lập')
     }
 
     const indexData = {
@@ -413,25 +413,25 @@ class AssetsBuilder {
       }
     }
 
-    // 添加唤醒词模型
+  // Thêm mô hình wakeword
     const wakewordInfo = this.getWakewordModelInfo()
     if (wakewordInfo) {
       indexData.srmodels = wakewordInfo.filename
     }
 
-    // 添加字体信息
+  // Thêm thông tin font
     const fontInfo = this.getFontInfo()
     if (fontInfo) {
       indexData.text_font = fontInfo.filename
     }
 
-    // 添加皮肤配置
+  // Thêm cấu hình skin
     const skinInfo = this.getSkinInfo()
     if (Object.keys(skinInfo).length > 0) {
       indexData.skin = skinInfo
     }
 
-    // 添加表情集合
+  // Thêm bộ emoji
     const emojiCollection = this.getEmojiCollectionInfo()
     if (emojiCollection.length > 0) {
       indexData.emoji_collection = emojiCollection.map(emoji => ({
@@ -444,8 +444,8 @@ class AssetsBuilder {
   }
 
   /**
-   * 准备打包资源
-   * @returns {Object} 打包资源清单
+   * Chuẩn bị danh sách tài nguyên để đóng gói
+   * @returns {Object} Danh sách tài nguyên
    */
   preparePackageResources() {
     const resources = {
@@ -454,7 +454,7 @@ class AssetsBuilder {
       config: { ...this.config }
     }
 
-    // 添加唤醒词模型
+  // Thêm mô hình wakeword
     const wakewordInfo = this.getWakewordModelInfo()
     if (wakewordInfo && wakewordInfo.name) {
       resources.files.push({
@@ -465,7 +465,7 @@ class AssetsBuilder {
       })
     }
 
-    // 添加字体文件
+  // Thêm file font
     const fontInfo = this.getFontInfo()
     if (fontInfo) {
       resources.files.push({
@@ -476,7 +476,7 @@ class AssetsBuilder {
       })
     }
 
-    // 添加表情文件
+  // Thêm file emoji
     const emojiCollection = this.getEmojiCollectionInfo()
     emojiCollection.forEach(emoji => {
       resources.files.push({
@@ -488,7 +488,7 @@ class AssetsBuilder {
       })
     })
 
-    // 添加背景图片
+  // Thêm ảnh nền
     const skin = this.config?.theme?.skin
     if (skin?.light?.backgroundType === 'image' && skin.light.backgroundImage) {
       resources.files.push({
@@ -511,15 +511,15 @@ class AssetsBuilder {
   }
 
   /**
-   * 预处理自定义字体
-   * @param {Function} progressCallback - 进度回调函数  
+   * Tiền xử lý font tùy chỉnh
+   * @param {Function} progressCallback - callback tiến độ
    * @returns {Promise<void>}
    */
   async preprocessCustomFonts(progressCallback = null) {
     const fontInfo = this.getFontInfo()
     
     if (fontInfo && fontInfo.type === 'custom' && !this.convertedFonts.has(fontInfo.filename)) {
-      if (progressCallback) progressCallback(20, '转换自定义字体...')
+  if (progressCallback) progressCallback(20, 'Chuyển đổi font tùy chỉnh...')
       
       try {
         const convertOptions = {
@@ -532,18 +532,18 @@ class AssetsBuilder {
           range: fontInfo.config.range || '',
           compression: false,
           progressCallback: (progress, message) => {
-            if (progressCallback) progressCallback(20 + progress * 0.2, `字体转换: ${message}`)
+            if (progressCallback) progressCallback(20 + progress * 0.2, `Chuyển đổi font: ${message}`)
           }
         }
         
         let convertedFont
         
-        // 使用浏览器端字体转换器
+  // Sử dụng bộ chuyển đổi font trong trình duyệt
         await this.fontConverterBrowser.initialize()
         convertedFont = await this.fontConverterBrowser.convertToCBIN(convertOptions)
         this.convertedFonts.set(fontInfo.filename, convertedFont)
 
-        // 保存转换后的字体到临时存储
+    // Lưu font đã chuyển đổi vào storage tạm
         if (this.autoSaveEnabled) {
           const tempKey = `converted_font_${fontInfo.filename}`
           try {
@@ -553,70 +553,70 @@ class AssetsBuilder {
               bpp: fontInfo.config.bpp,
               charset: fontInfo.config.charset
             })
-            console.log(`转换后的字体已保存到存储: ${fontInfo.filename}`)
+      console.log(`Font đã chuyển đổi đã được lưu vào storage: ${fontInfo.filename}`)
           } catch (error) {
-            console.warn(`保存转换后的字体失败: ${fontInfo.filename}`, error)
+      console.warn(`Lưu font đã chuyển đổi thất bại: ${fontInfo.filename}`, error)
           }
         }
       } catch (error) {
-        console.error('字体转换失败:', error)
-        throw new Error(`字体转换失败: ${error.message}`)
+    console.error('Chuyển đổi font thất bại:', error)
+    throw new Error(`Chuyển đổi font thất bại: ${error.message}`)
       }
     }
   }
 
   /**
-   * 生成 assets.bin
-   * @param {Function} progressCallback - 进度回调函数
-   * @returns {Promise<Blob>} 生成的 assets.bin 文件
+  * Sinh assets.bin
+  * @param {Function} progressCallback - callback tiến độ
+  * @returns {Promise<Blob>} Blob của file assets.bin
    */
   async generateAssetsBin(progressCallback = null) {
     if (!this.config) {
-      throw new Error('配置对象未设置')
+      throw new Error('Đối tượng cấu hình chưa được thiết lập')
     }
 
     try {
-      if (progressCallback) progressCallback(0, '开始生成...')
+  if (progressCallback) progressCallback(0, 'Bắt đầu tạo...')
       
-      // 预处理自定义字体
+  // Tiền xử lý font tùy chỉnh
       await this.preprocessCustomFonts(progressCallback)
       
       await new Promise(resolve => setTimeout(resolve, 100))
-      if (progressCallback) progressCallback(40, '准备资源文件...')
+  if (progressCallback) progressCallback(40, 'Chuẩn bị file tài nguyên...')
       
       const resources = this.preparePackageResources()
       
-      // 清理生成器状态
+  // Xóa trạng thái của generator
       this.wakenetPacker.clear()
       this.spiffsGenerator.clear()
       
-      // 处理各类资源文件
+  // Xử lý các file tài nguyên
       await this.processResourceFiles(resources, progressCallback)
       
       await new Promise(resolve => setTimeout(resolve, 100))
-      if (progressCallback) progressCallback(90, '生成最终文件...')
+  if (progressCallback) progressCallback(90, 'Tạo file cuối cùng...')
       
-      // 生成最终的 assets.bin
+  // Sinh file assets.bin cuối cùng
       const assetsBinData = await this.spiffsGenerator.generate((progress, message) => {
         if (progressCallback) {
           progressCallback(90 + progress * 0.1, message)
         }
       })
       
-      if (progressCallback) progressCallback(100, '生成完成')
+  if (progressCallback) progressCallback(100, 'Hoàn tất')
       
       return new Blob([assetsBinData], { type: 'application/octet-stream' })
       
     } catch (error) {
-      console.error('生成 assets.bin 失败:', error)
+  console.error('Tạo assets.bin thất bại:', error)
       throw error
     }
   }
 
   /**
-   * 下载 assets.bin 文件
-   * @param {Blob} blob - assets.bin 文件数据
-   * @param {string} filename - 下载文件名
+   * Tải xuống file assets.bin
+   * @param {Blob} blob - dữ liệu file assets.bin
+   * @param {string} filename - tên file khi tải
    */
   downloadAssetsBin(blob, filename = 'assets.bin') {
     const url = URL.createObjectURL(blob)
@@ -630,9 +630,9 @@ class AssetsBuilder {
   }
 
   /**
-   * 获取字体信息（包含转换功能）
-   * @param {File} fontFile - 字体文件（可选，如果提供则获取该文件的信息）
-   * @returns {Promise<Object>} 字体信息
+   * Lấy thông tin font (bao gồm chức năng chuyển đổi)
+   * @param {File} fontFile - file font (tùy chọn)
+   * @returns {Promise<Object>} Thông tin font
    */
   async getFontInfoWithDetails(fontFile = null) {
     try {
@@ -641,7 +641,7 @@ class AssetsBuilder {
       
       let info
       
-      // 使用浏览器端字体转换器
+  // Sử dụng bộ chuyển đổi font trong trình duyệt
       await this.fontConverterBrowser.initialize()
       info = await this.fontConverterBrowser.getFontInfo(file)
       
@@ -651,15 +651,15 @@ class AssetsBuilder {
         isCustom: true
       }
     } catch (error) {
-      console.error('获取字体详细信息失败:', error)
+      console.error('Lấy thông tin chi tiết font thất bại:', error)
       return null
     }
   }
 
   /**
-   * 估算字体大小
-   * @param {Object} fontConfig - 字体配置
-   * @returns {Promise<Object>} 大小估算结果
+   * Ước tính kích thước font
+   * @param {Object} fontConfig - cấu hình font
+   * @returns {Promise<Object>} Kết quả ước tính kích thước
    */
   async estimateFontSize(fontConfig = null) {
     try {
@@ -676,46 +676,46 @@ class AssetsBuilder {
       
       let sizeInfo
       
-      // 使用浏览器端字体转换器
-      sizeInfo = this.fontConverterBrowser.estimateSize(estimateOptions)
+  // Sử dụng bộ chuyển đổi font trong trình duyệt
+  sizeInfo = this.fontConverterBrowser.estimateSize(estimateOptions)
       
       return sizeInfo
     } catch (error) {
-      console.error('估算字体大小失败:', error)
+      console.error('Ước tính kích thước font thất bại:', error)
       return null
     }
   }
 
   /**
-   * 验证自定义字体配置
-   * @param {Object} fontConfig - 字体配置
-   * @returns {Object} 验证结果
+   * Xác thực cấu hình font tùy chỉnh
+   * @param {Object} fontConfig - Cấu hình font
+   * @returns {Object} Kết quả xác thực
    */
   validateCustomFont(fontConfig) {
     const errors = []
     const warnings = []
     
     if (!fontConfig.file) {
-      errors.push('缺少字体文件')
+      errors.push('Thiếu file font')
     } else {
-      // 使用浏览器端转换器验证
+  // Sử dụng bộ chuyển đổi trên trình duyệt để kiểm tra
       const isValid = this.fontConverterBrowser.validateFont(fontConfig.file)
         
       if (!isValid) {
-        errors.push('字体文件格式不支持')
+        errors.push('Định dạng file font không được hỗ trợ')
       }
     }
     
     if (fontConfig.size < 8 || fontConfig.size > 80) {
-      errors.push('字体大小必须在 8-80 之间')
+      errors.push('Kích thước font phải nằm trong khoảng 8-80')
     }
     
     if (![1, 2, 4, 8].includes(fontConfig.bpp)) {
-      errors.push('BPP 必须是 1, 2, 4 或 8')
+      errors.push('BPP phải là 1, 2, 4 hoặc 8')
     }
     
     if (!fontConfig.charset && !fontConfig.symbols && !fontConfig.range) {
-      warnings.push('未指定字符集、符号或范围，将使用默认字符集')
+      warnings.push('Chưa chỉ định charset, symbols hoặc range; sẽ dùng charset mặc định')
     }
     
     return {
@@ -727,8 +727,8 @@ class AssetsBuilder {
 
 
   /**
-   * 获取字体转换器状态
-   * @returns {Object} 转换器状态信息
+   * Lấy trạng thái bộ chuyển đổi font
+   * @returns {Object} Thông tin trạng thái bộ chuyển đổi
    */
   getConverterStatus() {
     return {
@@ -738,15 +738,15 @@ class AssetsBuilder {
   }
 
   /**
-   * 处理资源文件
-   * @param {Object} resources - 资源配置
-   * @param {Function} progressCallback - 进度回调
+   * Xử lý các file tài nguyên
+   * @param {Object} resources - cấu hình tài nguyên
+   * @param {Function} progressCallback - callback tiến độ
    */
   async processResourceFiles(resources, progressCallback = null) {
     let processedCount = 0
     const totalFiles = resources.files.length
     
-    // 添加 index.json 文件
+  // Thêm file index.json
     const indexJsonData = new TextEncoder().encode(JSON.stringify(resources.indexJson, null, 2))
     // print json string
     console.log('index.json', resources.indexJson);
@@ -755,22 +755,22 @@ class AssetsBuilder {
     for (const resource of resources.files) {
       const progressPercent = 40 + (processedCount / totalFiles) * 40
       if (progressCallback) {
-        progressCallback(progressPercent, `处理文件: ${resource.filename}`)
+        progressCallback(progressPercent, `Xử lý file: ${resource.filename}`)
       }
       
       try {
         await this.processResourceFile(resource)
         processedCount++
       } catch (error) {
-        console.error(`处理资源文件失败: ${resource.filename}`, error)
-        throw new Error(`处理资源文件失败: ${resource.filename} - ${error.message}`)
+        console.error(`Xử lý file tài nguyên thất bại: ${resource.filename}`, error)
+        throw new Error(`Xử lý file tài nguyên thất bại: ${resource.filename} - ${error.message}`)
       }
     }
   }
 
   /**
-   * 处理单个资源文件
-   * @param {Object} resource - 资源配置
+   * Xử lý một file tài nguyên
+   * @param {Object} resource - cấu hình tài nguyên
    */
   async processResourceFile(resource) {
     switch (resource.type) {
@@ -787,18 +787,18 @@ class AssetsBuilder {
         await this.processBackgroundFile(resource)
         break
       default:
-        console.warn(`未知的资源类型: ${resource.type}`)
+        console.warn(`Loại tài nguyên không xác định: ${resource.type}`)
     }
   }
 
   /**
-   * 处理唤醒词模型
-   * @param {Object} resource - 资源配置
+   * Xử lý mô hình wakeword
+   * @param {Object} resource - cấu hình tài nguyên
    */
   async processWakewordModel(resource) {
     const success = await this.wakenetPacker.loadModelFromShare(resource.name)
     if (!success) {
-      throw new Error(`加载唤醒词模型失败: ${resource.name}`)
+      throw new Error(`Tải mô hình wakeword thất bại: ${resource.name}`)
     }
     
     const srmodelsData = this.wakenetPacker.packModels()
@@ -806,79 +806,79 @@ class AssetsBuilder {
   }
 
   /**
-   * 处理字体文件
-   * @param {Object} resource - 资源配置
+   * Xử lý file font
+   * @param {Object} resource - cấu hình tài nguyên
    */
   async processFontFile(resource) {
     if (resource.config) {
-      // 自定义字体，使用转换后的数据
+  // Font tùy chỉnh: sử dụng dữ liệu đã chuyển đổi
       const convertedFont = this.convertedFonts.get(resource.filename)
       if (convertedFont) {
         this.spiffsGenerator.addFile(resource.filename, convertedFont)
       } else {
-        throw new Error(`找不到转换后的字体: ${resource.filename}`)
+        throw new Error(`Không tìm thấy font đã chuyển đổi: ${resource.filename}`)
       }
     } else {
-      // 预设字体，从share/fonts目录加载
+  // Font preset: tải từ static/fonts
       const fontData = await this.loadPresetFont(resource.source)
       this.spiffsGenerator.addFile(resource.filename, fontData)
     }
   }
 
   /**
-   * 处理表情文件
-   * @param {Object} resource - 资源配置
+   * Xử lý file emoji
+   * @param {Object} resource - Cấu hình tài nguyên
    */
   async processEmojiFile(resource) {
-    let imageData
-    let needsScaling = false
-    let imageFormat = 'png' // 默认格式
+  let imageData
+  let needsScaling = false
+  let imageFormat = 'png' // định dạng mặc định
     let isGif = false
     
     if (typeof resource.source === 'string' && resource.source.startsWith('preset:')) {
-      // 预设表情包
+      // Emoji preset
       const presetName = resource.source.replace('preset:', '')
       imageData = await this.loadPresetEmoji(presetName, resource.name)
     } else {
-      // 自定义表情
+      // Emoji tùy chỉnh
       const file = resource.source
       
-      // 检测是否为 GIF 格式
+  // Kiểm tra có phải GIF không
       isGif = this.isGifFile(file)
       
-      // 获取文件格式
+  // Lấy định dạng file
       const fileExtension = file.name.split('.').pop().toLowerCase()
       imageFormat = fileExtension
       
-      // 检查图片实际尺寸
+  // Kiểm tra kích thước thực tế của ảnh
       try {
         const actualDimensions = await this.getImageDimensions(file)
         const targetSize = resource.size || { width: 32, height: 32 }
         
-        // 如果实际尺寸超出目标尺寸范围，需要缩放
+  // Nếu kích thước thực tế vượt quá kích thước mục tiêu, cần scale
         if (actualDimensions.width > targetSize.width || 
             actualDimensions.height > targetSize.height) {
           needsScaling = true
-          console.log(`表情 ${resource.name} 需要缩放: ${actualDimensions.width}x${actualDimensions.height} -> ${targetSize.width}x${targetSize.height}`)
+          console.log(`Emoji ${resource.name} cần scale: ${actualDimensions.width}x${actualDimensions.height} -> ${targetSize.width}x${targetSize.height}`)
         }
       } catch (error) {
-        console.warn(`无法获取表情图片尺寸: ${resource.name}`, error)
+        console.warn(`Không thể lấy kích thước ảnh emoji: ${resource.name}`, error)
       }
       
-      // 如果不需要缩放，直接读取文件
+      // Nếu không cần scale, đọc file trực tiếp
       if (!needsScaling) {
         imageData = await this.fileToArrayBuffer(file)
       }
     }
     
-    // 如果需要缩放，根据文件类型选择缩放方法
+    // Nếu cần scale, chọn phương pháp theo loại file
     if (needsScaling) {
       try {
         const targetSize = resource.size || { width: 32, height: 32 }
         
         if (isGif) {
-          // 使用 GifScaler 处理 GIF 文件
-          console.log(`使用 GifScaler 处理 GIF 表情: ${resource.name}`)
+          // Dùng GifScaler để xử lý GIF
+          console.log(`Dùng GifScaler xử lý GIF: ${resource.name}`)
           const scaledGifBlob = await this.gifScaler.scaleGif(resource.source, {
             maxWidth: targetSize.width,
             maxHeight: targetSize.height,
@@ -886,12 +886,12 @@ class AssetsBuilder {
           })
           imageData = await this.fileToArrayBuffer(scaledGifBlob)
         } else {
-          // 使用常规方法处理其他格式的图片
+          // Dùng phương pháp thông thường cho các định dạng ảnh khác
           imageData = await this.scaleImageToFit(resource.source, targetSize, imageFormat)
         }
       } catch (error) {
-        console.error(`表情图片缩放失败: ${resource.name}`, error)
-        // 缩放失败时使用原图
+        console.error(`Scale ảnh emoji thất bại: ${resource.name}`, error)
+        // Nếu scale thất bại thì dùng ảnh gốc
         imageData = await this.fileToArrayBuffer(resource.source)
       }
     }
@@ -903,8 +903,8 @@ class AssetsBuilder {
   }
 
   /**
-   * 处理背景文件  
-   * @param {Object} resource - 资源配置
+   * Xử lý file nền
+   * @param {Object} resource - cấu hình tài nguyên
    */
   async processBackgroundFile(resource) {
     const imageData = await this.fileToArrayBuffer(resource.source)
@@ -915,9 +915,9 @@ class AssetsBuilder {
   }
 
   /**
-   * 加载预设字体
-   * @param {string} fontName - 字体名称
-   * @returns {Promise<ArrayBuffer>} 字体数据
+   * Tải font preset
+   * @param {string} fontName - tên font
+   * @returns {Promise<ArrayBuffer>} dữ liệu font
    */
   async loadPresetFont(fontName) {
     try {
@@ -927,15 +927,15 @@ class AssetsBuilder {
       }
       return await response.arrayBuffer()
     } catch (error) {
-      throw new Error(`加载预设字体失败: ${fontName} - ${error.message}`)
+      throw new Error(`Tải font preset thất bại: ${fontName} - ${error.message}`)
     }
   }
 
   /**
-   * 加载预设表情
-   * @param {string} presetName - 预设名称 (twemoji32/twemoji64)
-   * @param {string} emojiName - 表情名称
-   * @returns {Promise<ArrayBuffer>} 表情数据
+   * Tải emoji preset
+   * @param {string} presetName - tên preset (twemoji32/twemoji64)
+   * @param {string} emojiName - tên emoji
+   * @returns {Promise<ArrayBuffer>} dữ liệu emoji
    */
   async loadPresetEmoji(presetName, emojiName) {
     try {
@@ -945,30 +945,30 @@ class AssetsBuilder {
       }
       return await response.arrayBuffer()
     } catch (error) {
-      throw new Error(`加载预设表情失败: ${presetName}/${emojiName} - ${error.message}`)
+      throw new Error(`Tải emoji preset thất bại: ${presetName}/${emojiName} - ${error.message}`)
     }
   }
 
   /**
-   * 将文件转换为ArrayBuffer
-   * @param {File|Blob} file - 文件对象
-   * @returns {Promise<ArrayBuffer>} 文件数据
+   * Chuyển file thành ArrayBuffer
+   * @param {File|Blob} file - đối tượng file
+   * @returns {Promise<ArrayBuffer>} dữ liệu file
    */
   fileToArrayBuffer(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = () => resolve(reader.result)
-      reader.onerror = () => reject(new Error('读取文件失败'))
+  reader.onerror = () => reject(new Error('Đọc file thất bại'))
       reader.readAsArrayBuffer(file)
     })
   }
 
   /**
-   * 缩放图片以适应指定尺寸（等比例缩放，contain效果）
-   * @param {ArrayBuffer|File} imageData - 图片数据
-   * @param {Object} targetSize - 目标尺寸 {width, height}
-   * @param {string} format - 图片格式（用于透明背景处理）
-   * @returns {Promise<ArrayBuffer>} 缩放后的图片数据
+   * Scale ảnh để phù hợp kích thước (scale tỉ lệ giữ nguyên, hiệu ứng contain)
+   * @param {ArrayBuffer|File} imageData - dữ liệu ảnh
+   * @param {Object} targetSize - kích thước mục tiêu {width, height}
+   * @param {string} format - định dạng ảnh (xử lý nền trong suốt)
+   * @returns {Promise<ArrayBuffer>} dữ liệu ảnh sau khi scale
    */
   async scaleImageToFit(imageData, targetSize, format = 'png') {
     return new Promise((resolve, reject) => {
@@ -981,48 +981,48 @@ class AssetsBuilder {
           const canvas = document.createElement('canvas')
           const ctx = canvas.getContext('2d')
           
-          // 设置目标画布尺寸
+          // Thiết lập kích thước canvas mục tiêu
           canvas.width = targetSize.width
           canvas.height = targetSize.height
           
-          // 计算等比例缩放尺寸（contain效果）
+          // Tính kích thước scale tỉ lệ (hiệu ứng contain)
           const imgAspectRatio = img.width / img.height
           const targetAspectRatio = targetSize.width / targetSize.height
           
           let drawWidth, drawHeight, offsetX, offsetY
           
           if (imgAspectRatio > targetAspectRatio) {
-            // 图片较宽，按宽度缩放
+            // Ảnh rộng hơn, scale theo chiều rộng
             drawWidth = targetSize.width
             drawHeight = targetSize.width / imgAspectRatio
             offsetX = 0
             offsetY = (targetSize.height - drawHeight) / 2
           } else {
-            // 图片较高，按高度缩放
+            // Ảnh cao hơn, scale theo chiều cao
             drawHeight = targetSize.height
             drawWidth = targetSize.height * imgAspectRatio
             offsetX = (targetSize.width - drawWidth) / 2
             offsetY = 0
           }
           
-          // 对PNG格式保持透明背景
+          // Giữ nền trong suốt cho PNG
           if (format === 'png') {
-            // 清除画布，保持透明
+            // Xóa canvas để giữ trong suốt
             ctx.clearRect(0, 0, canvas.width, canvas.height)
           } else {
-            // 其他格式使用白色背景
+            // Các định dạng khác dùng nền trắng
             ctx.fillStyle = '#FFFFFF'
             ctx.fillRect(0, 0, canvas.width, canvas.height)
           }
           
-          // 绘制缩放后的图片
+          // Vẽ ảnh đã scale lên canvas
           ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight)
           
-          // 转换为ArrayBuffer
+          // Chuyển đổi thành ArrayBuffer
           canvas.toBlob((blob) => {
             const reader = new FileReader()
             reader.onload = () => resolve(reader.result)
-            reader.onerror = () => reject(new Error('转换图片数据失败'))
+            reader.onerror = () => reject(new Error('Chuyển đổi dữ liệu ảnh thất bại'))
             reader.readAsArrayBuffer(blob)
           }, `image/${format}`)
           
@@ -1035,7 +1035,7 @@ class AssetsBuilder {
       
       img.onerror = () => {
         URL.revokeObjectURL(url)
-        reject(new Error('无法加载图片'))
+        reject(new Error('Không thể tải ảnh'))
       }
       
       img.src = url
@@ -1043,9 +1043,9 @@ class AssetsBuilder {
   }
 
   /**
-   * 检测文件是否为 GIF 格式
-   * @param {File} file - 文件对象
-   * @returns {boolean} 是否为 GIF 格式
+   * Kiểm tra file có phải GIF không
+   * @param {File} file - đối tượng file
+   * @returns {boolean} có phải GIF hay không
    */
   isGifFile(file) {
     // 检查 MIME 类型
@@ -1059,9 +1059,9 @@ class AssetsBuilder {
   }
 
   /**
-   * 获取图片尺寸信息
-   * @param {ArrayBuffer|File} imageData - 图片数据
-   * @returns {Promise<Object>} 图片尺寸信息 {width, height}
+   * Lấy thông tin kích thước ảnh
+   * @param {ArrayBuffer|File} imageData - dữ liệu ảnh
+   * @returns {Promise<Object>} thông tin kích thước {width, height}
    */
   async getImageDimensions(imageData) {
     return new Promise((resolve, reject) => {
@@ -1079,7 +1079,7 @@ class AssetsBuilder {
       
       img.onerror = () => {
         URL.revokeObjectURL(url)
-        reject(new Error('无法获取图片尺寸'))
+        reject(new Error('Không thể lấy kích thước ảnh'))
       }
       
       img.src = url
@@ -1087,9 +1087,9 @@ class AssetsBuilder {
   }
 
   /**
-   * 将图片转换为RGB565格式的原始数据
-   * @param {ArrayBuffer} imageData - 图片数据
-   * @returns {Promise<ArrayBuffer>} RGB565原始数据
+   * Chuyển ảnh sang dữ liệu thô RGB565
+   * @param {ArrayBuffer} imageData - dữ liệu ảnh
+   * @returns {Promise<ArrayBuffer>} dữ liệu RGB565
    */
   async convertImageToRgb565(imageData) {
     return new Promise((resolve, reject) => {
@@ -1105,34 +1105,34 @@ class AssetsBuilder {
           canvas.width = this.config?.chip?.display?.width || 320
           canvas.height = this.config?.chip?.display?.height || 240
           
-          // 使用 cover 模式绘制图片，保持比例并居中显示
+          // Vẽ ảnh theo chế độ cover, giữ tỉ lệ và căn giữa
           const imgAspectRatio = img.width / img.height
           const canvasAspectRatio = canvas.width / canvas.height
           
           let drawWidth, drawHeight, offsetX, offsetY
           
           if (imgAspectRatio > canvasAspectRatio) {
-            // 图片较宽，按高度缩放 (cover效果)
+            // Ảnh rộng hơn, scale theo chiều cao (hiệu ứng cover)
             drawHeight = canvas.height
             drawWidth = canvas.height * imgAspectRatio
             offsetX = (canvas.width - drawWidth) / 2
             offsetY = 0
           } else {
-            // 图片较高，按宽度缩放 (cover效果)
+            // Ảnh cao hơn, scale theo chiều rộng (hiệu ứng cover)
             drawWidth = canvas.width
             drawHeight = canvas.width / imgAspectRatio
             offsetX = 0
             offsetY = (canvas.height - drawHeight) / 2
           }
           
-          // 绘制图片到画布，使用cover模式保持比例并居中
+          // Vẽ ảnh lên canvas theo chế độ cover để giữ tỉ lệ và căn giữa
           ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight)
           
           // 获取像素数据
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
           const pixels = imageData.data
           
-          // 转换为RGB565格式
+          // Chuyển đổi sang định dạng RGB565
           const rgb565Data = new ArrayBuffer(canvas.width * canvas.height * 2)
           const rgb565View = new Uint16Array(rgb565Data)
           
@@ -1144,15 +1144,15 @@ class AssetsBuilder {
             rgb565View[i / 4] = (r << 11) | (g << 5) | b
           }
           
-          // LVGL 常量定义
-          const LV_IMAGE_HEADER_MAGIC = 0x19  // LVGL图片header魔数
-          const LV_COLOR_FORMAT_RGB565 = 0x12 // RGB565颜色格式
+          // Định nghĩa hằng LVGL
+          const LV_IMAGE_HEADER_MAGIC = 0x19  // magic header LVGL
+          const LV_COLOR_FORMAT_RGB565 = 0x12 // định dạng màu RGB565
           
-          // 计算stride（每行字节数）
-          const stride = canvas.width * 2  // RGB565每像素2字节
+          // Tính stride (số byte mỗi hàng)
+          const stride = canvas.width * 2  // RGB565 mỗi pixel 2 byte
           
-          // 创建符合lv_image_dsc_t结构的header
-          const headerSize = 28  // lv_image_dsc_t结构大小: header(12) + data_size(4) + data(4) + reserved(4) + reserved_2(4) = 28字节
+          // Tạo header tương thích lv_image_dsc_t
+          const headerSize = 28  // kích thước cấu trúc lv_image_dsc_t
           const totalSize = headerSize + rgb565Data.byteLength
           const finalData = new ArrayBuffer(totalSize)
           const finalView = new Uint8Array(finalData)
@@ -1160,29 +1160,29 @@ class AssetsBuilder {
           
           let offset = 0
           
-          // lv_image_header_t结构 (16字节)
-          // magic: 8位, cf: 8位, flags: 16位 (共4字节)
+          // Cấu trúc lv_image_header_t (16 byte)
+          // magic: 8 bit, cf: 8 bit, flags: 16 bit (tổng 4 byte)
           const headerWord1 = (0 << 24) | (0 << 16) | (LV_COLOR_FORMAT_RGB565 << 8) | LV_IMAGE_HEADER_MAGIC
           headerView.setUint32(offset, headerWord1, true)
           offset += 4
           
-          // w: 16位, h: 16位 (共4字节)
+          // w: 16 bit, h: 16 bit (tổng 4 byte)
           const sizeWord = (canvas.height << 16) | canvas.width
 
           headerView.setUint32(offset, sizeWord, true)  
           offset += 4
           
-          // stride: 16位, reserved_2: 16位 (共4字节)
+          // stride: 16 bit, reserved_2: 16 bit (tổng 4 byte)
           const strideWord = (0 << 16) | stride
           headerView.setUint32(offset, strideWord, true)
           offset += 4
           
-          // lv_image_dsc_t其余字段
-          // data_size: 32位 (4字节)
+          // Các trường còn lại của lv_image_dsc_t
+          // data_size: 32 bit (4 byte)
           headerView.setUint32(offset, rgb565Data.byteLength, true)
           offset += 4
           
-          // data指针占位 (4字节，在实际使用中会指向数据部分)
+          // Con trỏ data (4 byte) - trong thực tế sẽ trỏ tới phần dữ liệu
           headerView.setUint32(offset, headerSize, true)  // 相对偏移
           offset += 4
           
@@ -1194,7 +1194,7 @@ class AssetsBuilder {
           headerView.setUint32(offset, 0, true)
           offset += 4
           
-          // 复制RGB565数据到header后面
+          // Sao chép dữ liệu RGB565 vào sau header
           finalView.set(new Uint8Array(rgb565Data), headerSize)
           
           URL.revokeObjectURL(url)
@@ -1207,7 +1207,7 @@ class AssetsBuilder {
       
       img.onerror = () => {
         URL.revokeObjectURL(url)
-        reject(new Error('无法加载图片'))
+        reject(new Error('Không thể tải ảnh'))
       }
       
       img.src = url
@@ -1215,35 +1215,35 @@ class AssetsBuilder {
   }
 
   /**
-   * 清理临时资源
+   * Dọn dẹp tài nguyên tạm
    */
   cleanup() {
-    this.resources.clear()
-    this.tempFiles = []
-    this.convertedFonts.clear()
-    this.wakenetPacker.clear()
-    this.spiffsGenerator.clear()
-    this.gifScaler.dispose() // 清理 GifScaler 资源
+  this.resources.clear()
+  this.tempFiles = []
+  this.convertedFonts.clear()
+  this.wakenetPacker.clear()
+  this.spiffsGenerator.clear()
+  this.gifScaler.dispose() // Dọn dẹp tài nguyên GifScaler
   }
 
   /**
-   * 清理所有存储数据（重新开始功能）
+   * Xóa tất cả dữ liệu lưu trữ (chức năng bắt đầu lại)
    * @returns {Promise<void>}
    */
   async clearAllStoredData() {
     try {
       await this.configStorage.clearAll()
       this.cleanup()
-      console.log('所有存储数据已清理')
+      console.log('Đã xóa toàn bộ dữ liệu lưu trữ')
     } catch (error) {
-      console.error('清理存储数据失败:', error)
+      console.error('Xóa dữ liệu lưu trữ thất bại:', error)
       throw error
     }
   }
 
   /**
-   * 获取存储状态信息
-   * @returns {Promise<Object>} 存储状态信息
+   * Lấy trạng thái lưu trữ
+   * @returns {Promise<Object>} Thông tin trạng thái storage
    */
   async getStorageStatus() {
     try {
@@ -1256,7 +1256,7 @@ class AssetsBuilder {
         autoSaveEnabled: this.autoSaveEnabled
       }
     } catch (error) {
-      console.error('获取存储状态失败:', error)
+      console.error('Lấy trạng thái storage thất bại:', error)
       return {
         hasStoredData: false,
         storageInfo: null,
@@ -1266,17 +1266,17 @@ class AssetsBuilder {
   }
 
   /**
-   * 启用/禁用自动保存
-   * @param {boolean} enabled - 是否启用
+   * Bật/Tắt tự động lưu
+   * @param {boolean} enabled - có bật không
    */
   setAutoSave(enabled) {
     this.autoSaveEnabled = enabled
-    console.log(`自动保存已${enabled ? '启用' : '禁用'}`)
+    console.log(`Tự động lưu đã ${enabled ? 'bật' : 'tắt'}`)
   }
 
   /**
-   * 获取资源清单用于显示
-   * @returns {Array} 资源清单
+   * Lấy danh sách tài nguyên để hiển thị
+   * @returns {Array} Danh sách tài nguyên
    */
   getResourceSummary() {
     const summary = []
@@ -1296,20 +1296,20 @@ class AssetsBuilder {
       let description = ''
       switch (file.type) {
         case 'wakeword':
-          description = `唤醒词模型: ${file.name} (${file.modelType})`
+          description = `Mô hình wakeword: ${file.name} (${file.modelType})`
           break
         case 'font':
           if (file.config) {
-            description = `自定义字体: 大小${file.config.size}px, BPP${file.config.bpp}`
+            description = `Font tùy chỉnh: ${file.config.size}px, BPP ${file.config.bpp}`
           } else {
-            description = `预设字体: ${file.source}`
+            description = `Font preset: ${file.source}`
           }
           break
         case 'emoji':
-          description = `表情: ${file.name} (${file.size.width}x${file.size.height})`
+          description = `Emoji: ${file.name} (${file.size.width}x${file.size.height})`
           break
         case 'background':
-          description = `${file.mode === 'light' ? '浅色' : '深色'}模式背景`
+          description = `${file.mode === 'light' ? 'Nền sáng' : 'Nền tối'} - ảnh nền`
           break
       }
       

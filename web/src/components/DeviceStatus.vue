@@ -1,9 +1,9 @@
 <template>
-  <!-- 桌面端布局 -->
+  <!-- Bố cục máy tính -->
   <div v-if="showComponent" class="hidden lg:flex items-center space-x-4" :class="deviceStatus.isOnline ? '' : 'opacity-60'">
-    <!-- 设备状态指示器 -->
+    <!-- Chỉ báo trạng thái thiết bị -->
     <div class="flex items-center space-x-2">
-      <!-- 在线状态图标 -->
+      <!-- Biểu tượng trạng thái trực tuyến -->
       <div class="flex items-center space-x-1">
         <div
           :class="[
@@ -15,17 +15,17 @@
           'text-sm font-medium',
           deviceStatus.isOnline ? 'text-gray-700' : 'text-gray-500'
         ]">
-          {{ deviceStatus.isOnline ? '设备在线' : '设备离线' }}
+          {{ deviceStatus.isOnline ? 'Thiết bị trực tuyến' : 'Thiết bị ngoại tuyến' }}
         </span>
       </div>
 
-      <!-- 网络状态 -->
+      <!-- Trạng thái mạng -->
       <div v-if="deviceStatus.isOnline && deviceInfo.network" class="flex items-center space-x-1">
-        <!-- Wi-Fi图标 -->
+        <!-- Biểu tượng Wi-Fi -->
         <svg v-if="deviceInfo.network.type === 'wifi'" class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 9.636c5.076 5.076 13.308 5.076 18.384 0a1 1 0 01-1.414-1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.879a3 3 0 00-4.243 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.414 1.414zM10 16a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
         </svg>
-        <!-- 4G图标 -->
+        <!-- Biểu tượng 4G -->
         <svg v-else-if="deviceInfo.network.type === '4g'" class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
           <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
         </svg>
@@ -33,9 +33,9 @@
       </div>
     </div>
 
-    <!-- 设备详细信息 -->
+    <!-- Thông tin chi tiết thiết bị -->
     <div v-if="deviceStatus.isOnline" class="flex items-center space-x-4 text-sm text-gray-600">
-      <!-- 芯片信息 -->
+      <!-- Thông tin chip -->
       <div v-if="deviceInfo.chip" class="flex items-center space-x-1">
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
@@ -43,7 +43,7 @@
         <span>{{ deviceInfo.chip.model }}</span>
       </div>
 
-      <!-- 开发板信息 -->
+      <!-- Thông tin bo mạch phát triển -->
       <div v-if="deviceInfo.board" class="flex items-center space-x-1">
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
@@ -52,7 +52,7 @@
       </div>
 
 
-      <!-- Assets分区大小 -->
+      <!-- Kích thước phân vùng Assets -->
       <div v-if="deviceInfo.assets" class="flex items-center space-x-1">
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
@@ -60,7 +60,7 @@
         <span>{{ deviceInfo.assets.size }}</span>
       </div>
 
-      <!-- 屏幕分辨率 -->
+      <!-- Độ phân giải màn hình -->
       <div v-if="deviceInfo.screen" class="flex items-center space-x-1">
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
@@ -71,9 +71,9 @@
 
   </div>
 
-  <!-- 移动端布局 -->
+  <!-- Bố cục di động -->
   <div v-if="showComponent" class="lg:hidden flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-    <!-- 头部状态栏 -->
+    <!-- Thanh trạng thái đầu trang -->
     <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
       <div class="flex items-center space-x-2">
         <div
@@ -86,11 +86,11 @@
           'text-sm font-medium',
           deviceStatus.isOnline ? 'text-gray-800' : 'text-gray-600'
         ]">
-          {{ deviceStatus.isOnline ? '设备在线' : '设备离线' }}
+          {{ deviceStatus.isOnline ? 'Thiết bị trực tuyến' : 'Thiết bị ngoại tuyến' }}
         </span>
       </div>
 
-      <!-- 网络状态 -->
+      <!-- Trạng thái mạng -->
       <div v-if="deviceStatus.isOnline && deviceInfo.network" class="flex items-center space-x-1">
         <svg v-if="deviceInfo.network.type === 'wifi'" class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 9.636c5.076 5.076 13.308 5.076 18.384 0a1 1 0 01-1.414-1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.879a3 3 0 00-4.243 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.414 1.414zM10 16a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
@@ -102,17 +102,17 @@
       </div>
     </div>
 
-    <!-- 设备信息区域 -->
+    <!-- Vùng thông tin thiết bị -->
     <div v-if="deviceStatus.isOnline" class="px-4 py-3">
       <div class="grid grid-cols-1 gap-2.5">
-        <!-- 第一行：芯片和开发板 -->
+        <!-- Hàng 1: Chip và bo mạch phát triển -->
         <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
           <div v-if="deviceInfo.chip" class="flex items-center space-x-2 flex-1">
             <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
             </svg>
             <div class="min-w-0 flex-1">
-              <div class="text-xs text-gray-500 leading-tight">芯片</div>
+              <div class="text-xs text-gray-500 leading-tight">Chip</div>
               <div class="text-sm text-gray-800 font-medium truncate">{{ deviceInfo.chip.model }}</div>
             </div>
           </div>
@@ -122,13 +122,13 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
             <div class="min-w-0 flex-1">
-              <div class="text-xs text-gray-500 leading-tight">开发板</div>
+              <div class="text-xs text-gray-500 leading-tight">Bo mạch</div>
               <div class="text-sm text-gray-800 font-medium truncate">{{ deviceInfo.board.model }}</div>
             </div>
           </div>
         </div>
 
-        <!-- 第二行：Assets和屏幕 -->
+        <!-- Hàng 2: Assets và Màn hình -->
         <div class="flex justify-between items-center py-1.5">
           <div v-if="deviceInfo.assets" class="flex items-center space-x-2 flex-1">
             <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +145,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
             </svg>
             <div class="min-w-0 flex-1">
-              <div class="text-xs text-gray-500 leading-tight">屏幕</div>
+              <div class="text-xs text-gray-500 leading-tight">Màn hình</div>
               <div class="text-sm text-gray-800 font-medium">{{ deviceInfo.screen.resolution }}</div>
             </div>
           </div>
@@ -179,13 +179,13 @@ const deviceInfo = ref({
 const retryTimer = ref(null)
 const isChecking = ref(false)
 
-// 获取URL参数
+// Lấy tham số URL
 const getUrlParameter = (name) => {
   const urlParams = new URLSearchParams(window.location.search)
   return urlParams.get(name)
 }
 
-// 检查设备是否在线
+// Kiểm tra thiết bị có trực tuyến không
 const checkDeviceStatus = async () => {
   if (isChecking.value || !token.value) return
 
@@ -204,7 +204,7 @@ const checkDeviceStatus = async () => {
       deviceStatus.value.error = ''
       deviceStatus.value.lastCheck = new Date()
 
-      // 获取设备详细信息
+      // Lấy thông tin chi tiết thiết bị
       await fetchDeviceInfo()
     } else {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
@@ -214,7 +214,7 @@ const checkDeviceStatus = async () => {
     deviceStatus.value.error = ''
     deviceStatus.value.lastCheck = new Date()
 
-    // 60秒后重试
+    // Thử lại sau 60 giây
     if (retryTimer.value) {
       clearTimeout(retryTimer.value)
     }
@@ -224,54 +224,54 @@ const checkDeviceStatus = async () => {
   }
 }
 
-// 获取设备详细信息
+// Lấy thông tin chi tiết thiết bị
 const fetchDeviceInfo = async () => {
   try {
-    // 并发获取所有设备信息
+    // Lấy tất cả thông tin thiết bị đồng thời
     const [systemInfoResponse, deviceStateResponse, screenInfoResponse] = await Promise.allSettled([
       callMcpTool('self.get_system_info'),
       callMcpTool('self.get_device_status'),
       callMcpTool('self.screen.get_info')
     ])
 
-    // 处理系统信息
+    // Xử lý thông tin hệ thống
     if (systemInfoResponse.status === 'fulfilled' && systemInfoResponse.value) {
       const data = systemInfoResponse.value.data || systemInfoResponse.value
 
-      deviceInfo.value.chip = { model: data.chip_model_name || '未知' }
-      deviceInfo.value.board = { model: data.board?.name || '未知' }
-      deviceInfo.value.firmware = { version: data.application?.version || '未知' }
+      deviceInfo.value.chip = { model: data.chip_model_name || 'Không rõ' }
+      deviceInfo.value.board = { model: data.board?.name || 'Không rõ' }
+      deviceInfo.value.firmware = { version: data.application?.version || 'Không rõ' }
 
-      // 从分区表中找到assets分区的大小
+      // Tìm kích thước phân vùng assets từ bảng phân vùng
       const assetsPartition = data.partition_table?.find(partition => partition.label === 'assets')
       if (assetsPartition) {
         const sizeInMB = Math.round(assetsPartition.size / 1024 / 1024)
         deviceInfo.value.assets = { size: `${sizeInMB}MB` }
       } else {
-        deviceInfo.value.assets = { size: '未知' }
+        deviceInfo.value.assets = { size: 'Không rõ' }
       }
     } else {
-      console.warn('系统信息获取失败:', systemInfoResponse.reason || systemInfoResponse.value)
-      deviceInfo.value.chip = { model: '未知' }
-      deviceInfo.value.board = { model: '未知' }
-      deviceInfo.value.firmware = { version: '未知' }
-      deviceInfo.value.assets = { size: '未知' }
+      console.warn('Lấy thông tin hệ thống thất bại:', systemInfoResponse.reason || systemInfoResponse.value)
+      deviceInfo.value.chip = { model: 'Không rõ' }
+      deviceInfo.value.board = { model: 'Không rõ' }
+      deviceInfo.value.firmware = { version: 'Không rõ' }
+      deviceInfo.value.assets = { size: 'Không rõ' }
     }
 
-    // 处理设备状态信息
+    // Xử lý thông tin trạng thái thiết bị
     if (deviceStateResponse.status === 'fulfilled' && deviceStateResponse.value) {
       const data = deviceStateResponse.value.data || deviceStateResponse.value
 
       deviceInfo.value.network = {
         type: data.network?.type || 'unknown',
-        signal: data.network?.signal || '未知'
+        signal: data.network?.signal || 'Không rõ'
       }
     } else {
-      console.warn('设备状态获取失败:', deviceStateResponse.reason || deviceStateResponse.value)
-      deviceInfo.value.network = { type: 'unknown', signal: '未知' }
+      console.warn('Lấy trạng thái thiết bị thất bại:', deviceStateResponse.reason || deviceStateResponse.value)
+      deviceInfo.value.network = { type: 'unknown', signal: 'Không rõ' }
     }
 
-    // 处理屏幕信息
+    // Xử lý thông tin màn hình
     if (screenInfoResponse.status === 'fulfilled' && screenInfoResponse.value) {
       const data = screenInfoResponse.value.data || screenInfoResponse.value
 
@@ -279,33 +279,33 @@ const fetchDeviceInfo = async () => {
         resolution: `${data.width || 0}x${data.height || 0}`
       }
     } else {
-      console.warn('屏幕信息获取失败:', screenInfoResponse.reason || screenInfoResponse.value)
-      deviceInfo.value.screen = { resolution: '未知' }
+      console.warn('Lấy thông tin màn hình thất bại:', screenInfoResponse.reason || screenInfoResponse.value)
+      deviceInfo.value.screen = { resolution: 'Không rõ' }
     }
   } catch (error) {
-    console.error('获取设备信息时发生错误:', error)
+    console.error('Lỗi khi lấy thông tin thiết bị:', error)
   }
 }
 
-// 格式化信号强度显示文本
+// Định dạng văn bản hiển thị cường độ tín hiệu
 const getSignalDisplayText = (signal) => {
-  if (!signal) return '未知'
+  if (!signal) return 'Không rõ'
 
   switch (signal.toLowerCase()) {
     case 'strong':
-      return '强'
+      return 'Mạnh'
     case 'medium':
-      return '中等'
+      return 'Trung bình'
     case 'weak':
-      return '弱'
+      return 'Yếu'
     case 'none':
-      return '无信号'
+      return 'Không có tín hiệu'
     default:
       return signal
   }
 }
 
-// 调用MCP工具
+// Gọi công cụ MCP
 const callMcpTool = async (toolName) => {
   try {
     const response = await fetch('/api/messaging/device/tools/call', {
@@ -321,20 +321,20 @@ const callMcpTool = async (toolName) => {
 
     if (response.ok) {
       const result = await response.json()
-      // 优先返回data字段，如果没有则返回整个结果
+      // Ưu tiên trả về trường data, nếu không có thì trả về toàn bộ kết quả
       return result
     } else {
       const errorText = await response.text()
-      console.error(`MCP工具 ${toolName} 失败:`, response.status, errorText)
-      throw new Error(`调用${toolName}失败: ${response.status} - ${errorText}`)
+      console.error(`Công cụ MCP ${toolName} thất bại:`, response.status, errorText)
+      throw new Error(`Gọi ${toolName} thất bại: ${response.status} - ${errorText}`)
     }
   } catch (error) {
-    console.error(`调用MCP工具 ${toolName} 失败:`, error)
+    console.error(`Gọi công cụ MCP ${toolName} thất bại:`, error)
     return null
   }
 }
 
-// 初始化组件
+// Khởi tạo component
 onMounted(() => {
   token.value = getUrlParameter('token')
   if (token.value) {
@@ -343,7 +343,7 @@ onMounted(() => {
   }
 })
 
-// 清理定时器
+// Dọn dẹp bộ đếm thời gian
 onUnmounted(() => {
   if (retryTimer.value) {
     clearTimeout(retryTimer.value)

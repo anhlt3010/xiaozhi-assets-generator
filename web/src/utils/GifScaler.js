@@ -1,27 +1,27 @@
 /**
- * GifScaler 类
- * 用于对 GIF 表情进行缩放处理
- * 
- * 主要功能：
- * - 解析 GIF 文件的每一帧
- * - 对每一帧进行缩放处理
- * - 重新生成缩放后的 GIF 文件
- * - 支持保持原始动画时序
- * 
- * 依赖建议：
- * 为了支持完整的多帧 GIF 处理，建议安装以下依赖：
+ * Lớp GifScaler
+ * Dùng để xử lý thay đổi kích thước GIF (ví dụ: emoji GIF)
+ *
+ * Chức năng chính:
+ * - Phân tích từng khung của file GIF
+ * - Thay đổi kích thước mỗi khung
+ * - Tạo lại file GIF sau khi thay đổi kích thước
+ * - Hỗ trợ giữ nguyên thời gian hoạt ảnh gốc
+ *
+ * Gợi ý phụ thuộc:
+ * Để hỗ trợ xử lý GIF nhiều khung đầy đủ, khuyến nghị cài đặt các gói sau:
  * ```bash
  * npm install gif.js gifuct-js
  * ```
- * 
- * 使用示例：
+ *
+ * Ví dụ sử dụng:
  * ```javascript
  * const scaler = new GifScaler({ 
  *   quality: 10, 
  *   debug: true,
  *   scalingMode: 'auto',  // 'auto', 'smooth', 'sharp', 'pixelated'
- *   workers: 2,  // 使用 2 个 worker 线程进行并行处理
- *   workerScript: '/share/gif.worker.js'  // Worker 脚本路径
+ *   workers: 2,  // sử dụng 2 worker để xử lý song song
+ *   workerScript: '/share/gif.worker.js'  // đường dẫn script worker
  * })
  * const scaledGif = await scaler.scaleGif(gifFile, {
  *   maxWidth: 64,
@@ -37,12 +37,12 @@ import GIF from 'gif.js'
 class GifScaler {
   constructor(options = {}) {
     this.options = {
-      quality: options.quality || 10,  // GIF 质量 (1-20, 越小质量越高)
-      repeat: options.repeat !== undefined ? options.repeat : -1,  // 重复次数 (-1 为无限循环)
-      debug: options.debug || false,  // 调试模式
-      scalingMode: options.scalingMode || 'auto',  // 缩放模式: 'auto', 'smooth', 'sharp', 'pixelated'
-      workers: options.workers || 2,  // Worker 线程数量 (1-4, 更多线程可以提高大型 GIF 的处理速度)
-      workerScript: options.workerScript || `${import.meta.env.BASE_URL}/workers/gif.worker.js`,  // Worker 脚本路径
+      quality: options.quality || 10,  // Chất lượng GIF (1-20, số nhỏ hơn = chất lượng cao hơn)
+      repeat: options.repeat !== undefined ? options.repeat : -1,  // Số lần lặp (-1 là lặp vô hạn)
+      debug: options.debug || false,  // Chế độ gỡ lỗi
+      scalingMode: options.scalingMode || 'auto',  // Chế độ thu phóng: 'auto', 'smooth', 'sharp', 'pixelated'
+      workers: options.workers || 2,  // Số luồng worker (1-4, nhiều luồng hơn giúp xử lý GIF lớn nhanh hơn)
+      workerScript: options.workerScript || `${import.meta.env.BASE_URL}/workers/gif.worker.js`,  // Đường dẫn script worker
       ...options
     }
     
@@ -58,9 +58,9 @@ class GifScaler {
   }
 
   /**
-   * 初始化 Canvas 和上下文
-   * @param {number} width - Canvas 宽度
-   * @param {number} height - Canvas 高度
+   * Khởi tạo Canvas và context
+   * @param {number} width - Chiều rộng Canvas
+   * @param {number} height - Chiều cao Canvas
    * @private
    */
   initCanvas(width, height) {
@@ -75,9 +75,9 @@ class GifScaler {
   }
 
   /**
-   * 解析 GIF 文件并提取所有帧
-   * @param {File|Blob} gifFile - GIF 文件
-   * @returns {Promise<Array>} 返回帧数据数组
+   * Phân tích file GIF và trích xuất tất cả khung
+   * @param {File|Blob} gifFile - File GIF
+   * @returns {Promise<Array>} Trả về mảng dữ liệu khung
    */
   async parseGifFrames(gifFile) {
     try {
@@ -90,9 +90,9 @@ class GifScaler {
 
 
   /**
-   * 使用 gifuct-js 进行高级 GIF 解析
-   * @param {File|Blob} gifFile - GIF 文件
-   * @returns {Promise<Array>} 返回帧数据数组
+   * Sử dụng gifuct-js để phân tích GIF nâng cao
+   * @param {File|Blob} gifFile - File GIF
+   * @returns {Promise<Array>} Trả về mảng dữ liệu khung
    */
   async parseGifWithGifuct(gifFile) {
     const arrayBuffer = await this.fileToArrayBuffer(gifFile)
@@ -104,11 +104,11 @@ class GifScaler {
     this.frames = []
     this.delays = []
     
-    // 读取原始GIF的循环信息
-    // 如果用户没有手动设置repeat，则使用原始GIF的循环设置
+    // Đọc thông tin vòng lặp của GIF gốc
+    // Nếu người dùng không thiết lập repeat, sẽ dùng cấu hình vòng lặp của GIF gốc
     if (this.options.repeat === -1) {  // 使用默认值
-      // gif.lsd.globalColorTableFlag, gif.applicationExtensions 等信息中可能包含循环信息
-      // 检查是否有 NETSCAPE2.0 应用扩展，它定义了循环次数
+      // Thông tin như gif.lsd.globalColorTableFlag, gif.applicationExtensions có thể chứa thông tin vòng lặp
+      // Kiểm tra xem có ứng dụng mở rộng NETSCAPE2.0 không, phần mở rộng này định nghĩa số lần lặp
       let originalRepeat = 0  // 0 表示无限循环
       
       if (gif.applicationExtensions) {
@@ -116,7 +116,7 @@ class GifScaler {
           ext.identifier === 'NETSCAPE' && ext.authenticationCode === '2.0'
         )
         if (netscapeExt && netscapeExt.data && netscapeExt.data.length >= 3) {
-          // NETSCAPE2.0 格式：[0x01, 低字节, 高字节]
+          // Định dạng NETSCAPE2.0: [0x01, byte thấp, byte cao]
           originalRepeat = netscapeExt.data[1] + (netscapeExt.data[2] << 8)
         }
       }
@@ -124,7 +124,7 @@ class GifScaler {
       this.gifRepeat = originalRepeat
       
       if (this.options.debug) {
-        console.log(`原始GIF循环设置: ${originalRepeat === 0 ? '无限循环' : originalRepeat + '次'}`)
+        console.log(`Cài đặt vòng lặp GIF gốc: ${originalRepeat === 0 ? 'lặp vô hạn' : originalRepeat + ' lần'}`)
       }
     } else {
       this.gifRepeat = this.options.repeat
@@ -136,47 +136,47 @@ class GifScaler {
     canvas.height = this.originalHeight
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
     
-    // 保存前一帧的图像数据（用于disposal type 3）
+  // Lưu dữ liệu ảnh của khung trước (dùng cho disposal type 3)
     let previousFrameData = null
     
     for (let i = 0; i < frames.length; i++) {
       const frame = frames[i]
       
-      // 根据 disposal 方法处理画布
+      // Xử lý canvas theo disposal method
       if (i === 0) {
-        // 第一帧：清除整个画布为透明
+        // Khung đầu: xóa toàn bộ canvas thành trong suốt
         ctx.clearRect(0, 0, canvas.width, canvas.height)
       } else if (frame.disposalType === 2) {
-        // 清除到背景色（透明）
+        // Xóa về màu nền (trong suốt)
         ctx.clearRect(0, 0, canvas.width, canvas.height)
       } else if (frame.disposalType === 3 && previousFrameData) {
-        // 恢复到前一帧状态
+        // Khôi phục về trạng thái khung trước
         ctx.putImageData(previousFrameData, 0, 0)
       }
-      // disposalType 0 和 1：不清除，保持当前内容
+      // disposalType 0 và 1: không xóa, giữ nguyên nội dung hiện tại
       
-      // 保存当前状态（用于disposalType 3）
+  // Lưu trạng thái hiện tại (dùng cho disposalType 3)
       if (frame.disposalType === 3) {
         previousFrameData = ctx.getImageData(0, 0, this.originalWidth, this.originalHeight)
       }
       
-      // 创建帧画布并绘制当前帧
+  // Tạo canvas cho khung và vẽ khung hiện tại
       const frameCanvas = document.createElement('canvas')
       frameCanvas.width = frame.dims.width
       frameCanvas.height = frame.dims.height
       const frameCtx = frameCanvas.getContext('2d', { willReadFrequently: true })
       
-      // 确保帧画布背景透明
+  // Đảm bảo nền canvas khung trong suốt
       frameCtx.clearRect(0, 0, frame.dims.width, frame.dims.height)
       
-      // 绘制帧像素数据
+  // Vẽ dữ liệu pixel của khung
       const imageData = new ImageData(frame.patch, frame.dims.width, frame.dims.height)
       frameCtx.putImageData(imageData, 0, 0)
       
-      // 将帧绘制到主画布上
+  // Vẽ khung lên canvas chính
       ctx.drawImage(frameCanvas, frame.dims.left || 0, frame.dims.top || 0)
       
-      // 获取完整帧的图像数据
+  // Lấy dữ liệu ảnh đầy đủ của khung
       const fullFrameImageData = ctx.getImageData(0, 0, this.originalWidth, this.originalHeight)
       this.frames.push(fullFrameImageData)
       this.delays.push(frame.delay || 100)
@@ -190,11 +190,11 @@ class GifScaler {
   }
 
   /**
-   * 缩放单个图像帧
-   * @param {ImageData} imageData - 源图像数据
-   * @param {number} targetWidth - 目标宽度
-   * @param {number} targetHeight - 目标高度
-   * @returns {ImageData} 缩放后的图像数据
+   * Thu nhỏ một khung ảnh
+   * @param {ImageData} imageData - Dữ liệu ảnh nguồn
+   * @param {number} targetWidth - Chiều rộng mục tiêu
+   * @param {number} targetHeight - Chiều cao mục tiêu
+   * @returns {ImageData} Dữ liệu ảnh sau khi thu nhỏ
    */
   scaleFrame(imageData, targetWidth, targetHeight) {
     const sourceCanvas = document.createElement('canvas')
@@ -202,7 +202,7 @@ class GifScaler {
     sourceCanvas.width = imageData.width
     sourceCanvas.height = imageData.height
     
-    // 确保源画布背景透明
+  // Đảm bảo nền canvas nguồn trong suốt
     sourceCtx.clearRect(0, 0, imageData.width, imageData.height)
     sourceCtx.putImageData(imageData, 0, 0)
     
@@ -211,14 +211,14 @@ class GifScaler {
     targetCanvas.width = targetWidth
     targetCanvas.height = targetHeight
     
-    // 确保目标画布背景透明
+  // Đảm bảo nền canvas đích trong suốt
     targetCtx.clearRect(0, 0, targetWidth, targetHeight)
     
-    // 根据缩放模式选择不同的缩放策略
+  // Chọn chiến lược thu phóng theo chế độ
     const scaleRatio = Math.min(targetWidth / imageData.width, targetHeight / imageData.height)
     const scalingMode = this.getOptimalScalingMode(scaleRatio)
     
-    // 对于大幅缩放，使用特殊的多步缩放算法来减少边缘模糊
+  // Đối với thu phóng lớn, dùng thuật toán nhiều bước để giảm mờ cạnh
     if (scaleRatio < 0.5 && scalingMode === 'pixelated') {
       this.scaleWithEdgePreservation(sourceCtx, targetCtx, imageData.width, imageData.height, targetWidth, targetHeight)
     } else {
@@ -234,85 +234,85 @@ class GifScaler {
   }
 
   /**
-   * 根据缩放比例获取最优的缩放模式
-   * @param {number} scaleRatio - 缩放比例
-   * @returns {string} 缩放模式
+   * Chọn chế độ thu phóng tối ưu theo tỉ lệ
+   * @param {number} scaleRatio - Tỉ lệ thu phóng
+   * @returns {string} Chế độ thu phóng
    */
   getOptimalScalingMode(scaleRatio) {
     if (this.options.scalingMode !== 'auto') {
       return this.options.scalingMode
     }
     
-    // 自动选择缩放模式
+    // Tự động chọn chế độ thu phóng
     if (scaleRatio >= 0.5) {
-      // 缩放比例较大时，使用平滑缩放保持质量
+      // Tỉ lệ lớn, dùng thu phóng mượt để giữ chất lượng
       return 'smooth'
     } else if (scaleRatio >= 0.25) {
-      // 中等缩放比例，使用锐化缩放保持边缘清晰
+      // Tỉ lệ trung bình, dùng chế độ sắc nét để giữ cạnh rõ
       return 'sharp'
     } else {
-      // 大幅缩小时，使用像素化缩放避免模糊
+      // Thu rất nhiều, dùng pixelated để tránh mờ
       return 'pixelated'
     }
   }
 
   /**
-   * 应用指定的缩放模式
-   * @param {CanvasRenderingContext2D} ctx - Canvas上下文
-   * @param {string} mode - 缩放模式
+   * Áp dụng chế độ thu phóng chỉ định
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {string} mode - Chế độ thu phóng
    */
   applyScalingMode(ctx, mode) {
     switch (mode) {
       case 'smooth':
-        // 平滑缩放 - 适合小幅缩放
+        // Thu phóng mượt - phù hợp cho thay đổi kích thước nhỏ
         ctx.imageSmoothingEnabled = true
         ctx.imageSmoothingQuality = 'high'
         break
         
       case 'sharp':
-        // 锐化缩放 - 适合中等缩放，保持边缘清晰
+        // Thu phóng sắc nét - phù hợp tỉ lệ trung bình, giữ cạnh rõ
         ctx.imageSmoothingEnabled = true
         ctx.imageSmoothingQuality = 'high'
         break
         
       case 'pixelated':
-        // 像素化缩放 - 适合大幅缩放，避免模糊
+        // Thu phóng pixelated - phù hợp thu phóng lớn, tránh mờ
         ctx.imageSmoothingEnabled = false
         break
         
       default:
-        // 默认平滑缩放
+        // Mặc định dùng thu phóng mượt
         ctx.imageSmoothingEnabled = true
         ctx.imageSmoothingQuality = 'high'
     }
   }
 
   /**
-   * 边缘保持缩放算法 - 减少线条变粗的问题
-   * @param {CanvasRenderingContext2D} sourceCtx - 源Canvas上下文
-   * @param {CanvasRenderingContext2D} targetCtx - 目标Canvas上下文
-   * @param {number} sourceWidth - 源宽度
-   * @param {number} sourceHeight - 源高度
-   * @param {number} targetWidth - 目标宽度
-   * @param {number} targetHeight - 目标高度
+   * Thuật toán giữ cạnh khi thu phóng - giảm hiện tượng đường bị dày
+   * @param {CanvasRenderingContext2D} sourceCtx - Context canvas nguồn
+   * @param {CanvasRenderingContext2D} targetCtx - Context canvas đích
+   * @param {number} sourceWidth - Chiều rộng nguồn
+   * @param {number} sourceHeight - Chiều cao nguồn
+   * @param {number} targetWidth - Chiều rộng đích
+   * @param {number} targetHeight - Chiều cao đích
    */
   scaleWithEdgePreservation(sourceCtx, targetCtx, sourceWidth, sourceHeight, targetWidth, targetHeight) {
     const scaleRatio = Math.min(targetWidth / sourceWidth, targetHeight / sourceHeight)
     
-    // 如果缩放比例很小，使用多步缩放来保持边缘清晰
+    // Nếu tỉ lệ rất nhỏ, dùng nhiều bước để giữ cạnh rõ
     if (scaleRatio < 0.5) {
-      // 创建中间画布，分步缩放
+      // Tạo canvas trung gian, thu phóng theo từng bước
       const intermediateCanvas = document.createElement('canvas')
       const intermediateCtx = intermediateCanvas.getContext('2d')
       
-      // 第一步：缩放到中间尺寸（至少50%）
+  // Bước 1: thu nhỏ tới kích thước trung gian (ít nhất 50%)
       const intermediateWidth = Math.max(sourceWidth * 0.5, targetWidth)
       const intermediateHeight = Math.max(sourceHeight * 0.5, targetHeight)
       
       intermediateCanvas.width = intermediateWidth
       intermediateCanvas.height = intermediateHeight
       
-      // 使用像素化缩放进行第一步
+  // Dùng thu phóng pixelated cho bước 1
       intermediateCtx.imageSmoothingEnabled = false
       intermediateCtx.drawImage(
         sourceCtx.canvas,
@@ -320,9 +320,9 @@ class GifScaler {
         0, 0, intermediateWidth, intermediateHeight
       )
       
-      // 第二步：从中间尺寸缩放到目标尺寸
+      // Bước 2: từ kích thước trung gian tới kích thước mục tiêu
       if (intermediateWidth !== targetWidth || intermediateHeight !== targetHeight) {
-        // 如果还需要进一步缩放，使用平滑缩放
+        // Nếu cần giảm thêm, dùng thu phóng mượt
         targetCtx.imageSmoothingEnabled = true
         targetCtx.imageSmoothingQuality = 'high'
         targetCtx.drawImage(
@@ -331,11 +331,11 @@ class GifScaler {
           0, 0, targetWidth, targetHeight
         )
       } else {
-        // 直接复制
+        // Sao chép trực tiếp
         targetCtx.drawImage(intermediateCanvas, 0, 0)
       }
     } else {
-      // 缩放比例较大，直接使用像素化缩放
+      // Tỉ lệ vừa phải hoặc lớn, dùng pixelated trực tiếp
       targetCtx.imageSmoothingEnabled = false
       targetCtx.drawImage(
         sourceCtx.canvas,
@@ -346,12 +346,12 @@ class GifScaler {
   }
 
   /**
-   * 计算保持宽高比的目标尺寸
-   * @param {number} originalWidth - 原始宽度
-   * @param {number} originalHeight - 原始高度  
-   * @param {number} maxWidth - 最大宽度
-   * @param {number} maxHeight - 最大高度
-   * @returns {Object} 包含 width 和 height 的对象
+   * Tính kích thước mục tiêu giữ tỉ lệ
+   * @param {number} originalWidth - Chiều rộng gốc
+   * @param {number} originalHeight - Chiều cao gốc
+   * @param {number} maxWidth - Chiều rộng tối đa
+   * @param {number} maxHeight - Chiều cao tối đa
+   * @returns {Object} Object chứa width và height
    */
   calculateTargetSize(originalWidth, originalHeight, maxWidth, maxHeight) {
     const ratio = Math.min(maxWidth / originalWidth, maxHeight / originalHeight)
@@ -363,20 +363,20 @@ class GifScaler {
   }
 
   /**
-   * 主要的缩放函数
-   * @param {File|Blob} gifFile - 输入的 GIF 文件
-   * @param {Object} scaleOptions - 缩放选项
-   * @param {number} scaleOptions.maxWidth - 最大宽度
-   * @param {number} scaleOptions.maxHeight - 最大高度
-   * @param {boolean} scaleOptions.keepAspectRatio - 是否保持宽高比
-   * @returns {Promise<Blob>} 返回缩放后的 GIF Blob
+   * Hàm chính để thay đổi kích thước
+   * @param {File|Blob} gifFile - File GIF đầu vào
+   * @param {Object} scaleOptions - Tùy chọn thu phóng
+   * @param {number} scaleOptions.maxWidth - Chiều rộng tối đa
+   * @param {number} scaleOptions.maxHeight - Chiều cao tối đa
+   * @param {boolean} scaleOptions.keepAspectRatio - Có giữ tỉ lệ hay không
+   * @returns {Promise<Blob>} Trả về Blob GIF sau khi thu nhỏ
    */
   async scaleGif(gifFile, scaleOptions) {
     try {
       const { maxWidth, maxHeight, keepAspectRatio = true } = scaleOptions
       
       if (!maxWidth || !maxHeight) {
-        throw new Error('必须指定最大宽度和高度')
+        throw new Error('Phải chỉ định chiều rộng và chiều cao tối đa')
       }
       
       // 解析原始 GIF
@@ -401,7 +401,7 @@ class GifScaler {
       // 检查是否需要缩放
       if (this.targetWidth === this.originalWidth && this.targetHeight === this.originalHeight) {
         if (this.options.debug) {
-          console.log('无需缩放，返回原始文件')
+          console.log('Không cần thay đổi kích thước, trả về file gốc')
         }
         return gifFile
       }
@@ -415,37 +415,37 @@ class GifScaler {
       const scaledGifBlob = await this.generateGif(scaledFrames, this.delays)
       
       if (this.options.debug) {
-        console.log(`GIF 缩放完成: ${this.originalWidth}x${this.originalHeight} -> ${this.targetWidth}x${this.targetHeight}`)
+        console.log(`Thu nhỏ GIF hoàn thành: ${this.originalWidth}x${this.originalHeight} -> ${this.targetWidth}x${this.targetHeight}`)
       }
       
       return scaledGifBlob
       
     } catch (error) {
-      throw new Error(`GIF 缩放失败: ${error.message}`)
+      throw new Error(`Thu nhỏ GIF thất bại: ${error.message}`)
     }
   }
 
   /**
-   * 生成新的 GIF 文件
-   * @param {Array<ImageData>} frames - 图像帧数组
-   * @param {Array<number>} delays - 延迟数组
-   * @returns {Promise<Blob>} 生成的 GIF Blob
+   * Tạo file GIF mới
+   * @param {Array<ImageData>} frames - Mảng khung ảnh
+   * @param {Array<number>} delays - Mảng thời gian trễ
+   * @returns {Promise<Blob>} Blob GIF tạo ra
    */
   async generateGif(frames, delays) {
     try {
-      // 统一使用 gif.js 生成 GIF，无论单帧还是多帧
+      // Dùng gif.js để tạo GIF, bất kể đơn khung hay nhiều khung
       return await this.generateGifWithGifJs(frames, delays)
       
     } catch (error) {
-      throw new Error(`GIF 生成失败: ${error.message}`)
+      throw new Error(`Tạo GIF thất bại: ${error.message}`)
     }
   }
 
   /**
-   * 使用 gif.js 生成动态 GIF
-   * @param {Array<ImageData>} frames - 图像帧数组
-   * @param {Array<number>} delays - 延迟数组
-   * @returns {Promise<Blob>} 生成的 GIF Blob
+   * Sử dụng gif.js để tạo GIF động
+   * @param {Array<ImageData>} frames - Mảng khung ảnh
+   * @param {Array<number>} delays - Mảng thời gian trễ
+   * @returns {Promise<Blob>} Blob GIF tạo ra
    */
   async generateGifWithGifJs(frames, delays) {
     return new Promise((resolve, reject) => {
@@ -455,12 +455,12 @@ class GifScaler {
         width: this.targetWidth,
         height: this.targetHeight,
         transparent: 'rgba(255, 0, 255, 0)',
-        repeat: this.gifRepeat !== undefined ? this.gifRepeat : 0,  // 0表示无限循环
-        workerScript: this.options.workerScript  // 指定 worker 脚本路径
-        // gif.js 会自动处理透明像素，不需要手动设置 transparent 选项
+        repeat: this.gifRepeat !== undefined ? this.gifRepeat : 0,  // 0 biểu thị lặp vô hạn
+        workerScript: this.options.workerScript  // Chỉ định đường dẫn script worker
+        // gif.js tự xử lý pixel trong suốt, không cần đặt tùy chọn transparent thủ công
       })
       
-      // 添加所有帧
+      // Thêm tất cả khung
       frames.forEach((frameData, index) => {
         const canvas = document.createElement('canvas')
         canvas.width = this.targetWidth
@@ -468,6 +468,7 @@ class GifScaler {
         const ctx = canvas.getContext('2d', { willReadFrequently: true })
         
         // 确保画布背景透明
+        // Đảm bảo nền canvas trong suốt
         ctx.clearRect(0, 0, this.targetWidth, this.targetHeight)
         ctx.putImageData(frameData, 0, 0)
         
@@ -476,13 +477,13 @@ class GifScaler {
       
       gif.on('finished', (blob) => {
         if (this.options.debug) {
-          console.log(`GIF generated: ${frames.length} frames, ${blob.size} bytes, repeat: ${this.gifRepeat === 0 ? '无限循环' : this.gifRepeat + '次'}`)
+          console.log(`GIF generated: ${frames.length} frames, ${blob.size} bytes, repeat: ${this.gifRepeat === 0 ? 'lặp vô hạn' : this.gifRepeat + ' lần'}`)
         }
         resolve(blob)
       })
       
       gif.on('abort', () => {
-        reject(new Error('GIF 生成被中止'))
+        reject(new Error('Tạo GIF bị huỷ'))
       })
       
       gif.render()
@@ -490,9 +491,9 @@ class GifScaler {
   }
 
   /**
-   * 获取 GIF 信息
-   * @param {File|Blob} gifFile - GIF 文件
-   * @returns {Promise<Object>} GIF 信息对象
+   * Lấy thông tin GIF
+   * @param {File|Blob} gifFile - File GIF
+   * @returns {Promise<Object>} Object thông tin GIF
    */
   async getGifInfo(gifFile) {
     try {
@@ -508,16 +509,16 @@ class GifScaler {
         fileSize: gifFile.size
       }
     } catch (error) {
-      throw new Error(`获取 GIF 信息失败: ${error.message}`)
+      throw new Error(`Lấy thông tin GIF thất bại: ${error.message}`)
     }
   }
 
   /**
-   * 检查是否需要缩放
-   * @param {File|Blob} gifFile - GIF 文件
-   * @param {number} maxWidth - 最大宽度
-   * @param {number} maxHeight - 最大高度
-   * @returns {Promise<boolean>} 是否需要缩放
+   * Kiểm tra xem có cần thay đổi kích thước
+   * @param {File|Blob} gifFile - File GIF
+   * @param {number} maxWidth - Chiều rộng tối đa
+   * @param {number} maxHeight - Chiều cao tối đa
+   * @returns {Promise<boolean>} Có cần thu nhỏ hay không
    */
   async needsScaling(gifFile, maxWidth, maxHeight) {
     const info = await this.getGifInfo(gifFile)
@@ -525,8 +526,8 @@ class GifScaler {
   }
 
   /**
-   * 将文件转换为 ArrayBuffer
-   * @param {File|Blob} file - 文件对象
+   * Chuyển file sang ArrayBuffer
+   * @param {File|Blob} file - Đối tượng file
    * @returns {Promise<ArrayBuffer>} ArrayBuffer
    */
   async fileToArrayBuffer(file) {
@@ -539,10 +540,10 @@ class GifScaler {
   }
 
   /**
-   * 批量缩放多个 GIF 文件
-   * @param {Array<File>} gifFiles - GIF 文件数组
-   * @param {Object} scaleOptions - 缩放选项
-   * @returns {Promise<Array<Blob>>} 缩放后的 GIF 数组
+   * Thu nhỏ hàng loạt nhiều file GIF
+   * @param {Array<File>} gifFiles - Mảng file GIF
+   * @param {Object} scaleOptions - Tùy chọn thu phóng
+   * @returns {Promise<Array<Blob>>} Mảng kết quả GIF đã thu nhỏ
    */
   async scaleBatchGifs(gifFiles, scaleOptions) {
     const results = []
@@ -550,7 +551,7 @@ class GifScaler {
     for (let i = 0; i < gifFiles.length; i++) {
       try {
         if (this.options.debug) {
-          console.log(`处理第 ${i + 1}/${gifFiles.length} 个文件`)
+          console.log(`Đang xử lý file thứ ${i + 1}/${gifFiles.length}`)
         }
         
         const scaledGif = await this.scaleGif(gifFiles[i], scaleOptions)
@@ -574,17 +575,17 @@ class GifScaler {
   }
 
   /**
-   * 获取建议的缩放尺寸
-   * @param {number} originalWidth - 原始宽度
-   * @param {number} originalHeight - 原始高度
-   * @param {Array<Object>} targetSizes - 目标尺寸数组，如 [{name: '32x32', width: 32, height: 32}]
-   * @returns {Object} 建议的缩放配置
+   * Lấy kích thước đề xuất để thu phóng
+   * @param {number} originalWidth - Chiều rộng gốc
+   * @param {number} originalHeight - Chiều cao gốc
+   * @param {Array<Object>} targetSizes - Mảng kích thước mục tiêu, ví dụ [{name: '32x32', width: 32, height: 32}]
+   * @returns {Object} Cấu hình đề xuất
    */
   getSuggestedScaling(originalWidth, originalHeight, targetSizes = []) {
     const suggestions = []
     
     // 默认目标尺寸
-    const defaultSizes = [
+  const defaultSizes = [
       { name: 'emoji_32', width: 32, height: 32 },
       { name: 'emoji_64', width: 64, height: 64 },
       { name: 'small', width: 48, height: 48 },
@@ -617,7 +618,7 @@ class GifScaler {
   }
 
   /**
-   * 清理资源
+   * Giải phóng tài nguyên
    */
   dispose() {
     if (this.canvas) {
@@ -627,7 +628,7 @@ class GifScaler {
     this.frames = []
     this.delays = []
     
-    // 清理可能的 Object URLs
+    // Hủy các Object URLs nếu có
     if (this.tempObjectUrls) {
       this.tempObjectUrls.forEach(url => URL.revokeObjectURL(url))
       this.tempObjectUrls = []

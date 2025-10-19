@@ -1,11 +1,11 @@
 <template>
   <div class="space-y-6">
     <div>
-      <h2 class="text-xl font-semibold text-gray-900 mb-4">步骤 2: 主题设计</h2>
-      <p class="text-gray-600 mb-6">配置唤醒词、字体、表情和背景来自定义您的小智AI主题。</p>
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">Bước 2: Thiết kế giao diện</h2>
+      <p class="text-gray-600 mb-6">Cấu hình từ đánh thức, font chữ, biểu tượng cảm xúc và nền để tùy chỉnh giao diện AI Tiểu Trí của bạn.</p>
     </div>
 
-    <!-- Tab Navigation -->
+    <!-- Điều hướng Tab -->
     <div class="border-b border-gray-200">
       <nav class="-mb-px flex space-x-8">
         <button
@@ -28,7 +28,7 @@
       </nav>
     </div>
 
-    <!-- Tab Content -->
+    <!-- Nội dung Tab -->
     <div class="min-h-96">
       <WakewordConfig 
         v-if="currentTab === 'wakeword'"
@@ -52,20 +52,20 @@
       />
     </div>
 
-    <!-- Navigation Buttons -->
+    <!-- Nút điều hướng -->
     <div class="flex justify-between">
       <button 
         @click="$emit('prev')"
         class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
       >
-        上一步
+        Bước trước
       </button>
       <button 
         @click="handleNext"
         :disabled="!canProceed"
         class="bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 text-white px-6 py-2 rounded-lg font-medium transition-colors"
       >
-        下一步
+        Bước tiếp theo
       </button>
     </div>
   </div>
@@ -78,7 +78,7 @@ import FontConfig from './tabs/FontConfig.vue'
 import EmojiConfig from './tabs/EmojiConfig.vue'
 import BackgroundConfig from './tabs/BackgroundConfig.vue'
 
-// Icons (simple SVG components)
+// Biểu tượng (các component SVG đơn giản)
 const MicrophoneIcon = {
   render() {
     return h('svg', {
@@ -161,10 +161,10 @@ const emit = defineEmits(['update:modelValue', 'next', 'prev', 'tabChange'])
 const currentTab = ref(props.activeTab)
 
 const tabs = [
-  { id: 'wakeword', name: '唤醒词配置', icon: MicrophoneIcon },
-  { id: 'font', name: '字体配置', icon: FontIcon },
-  { id: 'emoji', name: '表情集合', icon: EmojiIcon },
-  { id: 'background', name: '聊天背景', icon: BackgroundIcon }
+  { id: 'wakeword', name: 'Cấu hình từ đánh thức', icon: MicrophoneIcon },
+  { id: 'font', name: 'Cấu hình font chữ', icon: FontIcon },
+  { id: 'emoji', name: 'Bộ biểu tượng', icon: EmojiIcon },
+  { id: 'background', name: 'Nền trò chuyện', icon: BackgroundIcon }
 ]
 
 const localValue = computed({
@@ -181,7 +181,7 @@ const getTabStatus = (tabId) => {
     case 'emoji':
       return localValue.value.emoji.preset || Object.keys(localValue.value.emoji.custom.images).length > 0
     case 'background':
-      return true // 背景默认已配置
+      return true // Nền đã được cấu hình mặc định
     default:
       return false
   }
@@ -204,7 +204,7 @@ const handleTabClick = (tabId) => {
   emit('tabChange', tabId)
 }
 
-// 监听外部activeTab的变化
+// Theo dõi thay đổi activeTab từ bên ngoài
 watch(() => props.activeTab, (newTab) => {
   currentTab.value = newTab
 })

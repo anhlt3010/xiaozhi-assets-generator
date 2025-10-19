@@ -1,167 +1,167 @@
-# 配置持久化存储功能说明
+# Hướng dẫn chức năng lưu trữ cấu hình lâu dài
 
-## 功能概述
+## Tổng quan chức năng
 
-本项目新增了基于 IndexedDB 的配置和文件持久化存储功能，让用户在刷新页面后仍能保持之前的配置状态和上传的文件。
+Dự án này đã bổ sung chức năng lưu trữ lâu dài cấu hình và tệp dựa trên IndexedDB, cho phép người dùng giữ nguyên trạng thái cấu hình và tệp đã tải lên sau khi làm mới trang.
 
-## 主要特性
+## Tính năng chính
 
-### 1. 自动配置保存
-- **实时保存**：用户修改配置时自动保存到 IndexedDB
-- **智能检测**：页面加载时自动检测是否有已保存的配置
-- **状态恢复**：恢复用户的进度位置和主题标签状态
+### 1. Tự động lưu cấu hình
+- **Lưu theo thời gian thực**: Tự động lưu vào IndexedDB khi người dùng sửa đổi cấu hình
+- **Phát hiện thông minh**: Tự động phát hiện cấu hình đã lưu khi tải trang
+- **Khôi phục trạng thái**: Khôi phục vị trí tiến độ và trạng thái tab giao diện của người dùng
 
-### 2. 文件自动存储
-- **字体文件**：自定义字体文件自动保存，包含转换后的字体数据
-- **表情图片**：自定义表情图片自动保存到存储
-- **背景图片**：浅色/深色模式背景图片自动保存
+### 2. Tự động lưu trữ tệp
+- **Tệp font chữ**: Tự động lưu tệp font tùy chỉnh, bao gồm dữ liệu font đã chuyển đổi
+- **Hình ảnh biểu tượng**: Tự động lưu hình ảnh biểu tượng tùy chỉnh vào bộ nhớ
+- **Hình ảnh nền**: Tự động lưu hình nền chế độ sáng/tối
 
-### 3. 重新开始功能
-- **一键清理**：提供重新开始按钮，确认后清空所有存储数据
-- **安全确认**：包含详细的确认对话框，防止误操作
-- **完整重置**：清理配置、文件和临时数据
+### 3. Chức năng bắt đầu lại
+- **Dọn dẹp một chạm**: Cung cấp nút bắt đầu lại, xóa toàn bộ dữ liệu lưu trữ sau khi xác nhận
+- **Xác nhận an toàn**: Bao gồm hộp thoại xác nhận chi tiết, ngăn thao tác nhầm lẫn
+- **Đặt lại hoàn toàn**: Dọn dẹp cấu hình, tệp và dữ liệu tạm thời
 
-## 技术实现
+## Triển khai kỹ thuật
 
-### 核心组件
+### Các component cốt lõi
 
 #### ConfigStorage.js
-- IndexedDB 数据库管理
-- 配置存储与恢复
-- 文件二进制存储
-- 临时数据管理
+- Quản lý cơ sở dữ liệu IndexedDB
+- Lưu trữ và khôi phục cấu hình
+- Lưu trữ nhị phân tệp
+- Quản lý dữ liệu tạm thời
 
 #### StorageHelper.js
-- 为各组件提供便捷的存储 API
-- 统一的文件保存和删除接口
-- 分类管理不同类型的资源文件
+- Cung cấp API lưu trữ tiện lợi cho các component
+- Giao diện thống nhất để lưu và xóa tệp
+- Quản lý phân loại các loại tệp tài nguyên khác nhau
 
-#### AssetsBuilder.js 集成
-- 与存储系统深度集成
-- 自动保存转换后的字体数据
-- 资源文件智能恢复
+#### Tích hợp AssetsBuilder.js
+- Tích hợp sâu với hệ thống lưu trữ
+- Tự động lưu dữ liệu font đã chuyển đổi
+- Khôi phục thông minh tệp tài nguyên
 
-### 存储结构
+### Cấu trúc lưu trữ
 
 ```javascript
-// 数据库：XiaozhiConfigDB
+// Cơ sở dữ liệu: XiaozhiConfigDB
 {
-  configs: {      // 配置表
+  configs: {      // Bảng cấu hình
     key: 'current_config',
-    config: { ... },           // 完整配置对象
-    currentStep: 1,           // 当前步骤
-    activeThemeTab: 'font',   // 活跃标签
-    timestamp: 1234567890     // 保存时间
+    config: { ... },           // Đối tượng cấu hình đầy đủ
+    currentStep: 1,           // Bước hiện tại
+    activeThemeTab: 'font',   // Tab đang hoạt động
+    timestamp: 1234567890     // Thời gian lưu
   },
   
-  files: {        // 文件表
+  files: {        // Bảng tệp
     id: 'custom_font',
-    type: 'font',             // 文件类型
-    name: 'MyFont.ttf',       // 文件名
-    size: 1024,               // 文件大小
-    mimeType: 'font/ttf',     // MIME类型
-    data: ArrayBuffer,        // 文件二进制数据
-    metadata: { ... },        // 元数据
-    timestamp: 1234567890     // 保存时间
+    type: 'font',             // Loại tệp
+    name: 'MyFont.ttf',       // Tên tệp
+    size: 1024,               // Kích thước tệp
+    mimeType: 'font/ttf',     // Loại MIME
+    data: ArrayBuffer,        // Dữ liệu nhị phân tệp
+    metadata: { ... },        // Siêu dữ liệu
+    timestamp: 1234567890     // Thời gian lưu
   },
   
-  temp_data: {    // 临时数据表
+  temp_data: {    // Bảng dữ liệu tạm thời
     key: 'converted_font_xxx',
-    type: 'converted_font',   // 数据类型
-    data: ArrayBuffer,        // 转换后数据
-    metadata: { ... },        // 元数据
-    timestamp: 1234567890     // 保存时间
+    type: 'converted_font',   // Loại dữ liệu
+    data: ArrayBuffer,        // Dữ liệu đã chuyển đổi
+    metadata: { ... },        // Siêu dữ liệu
+    timestamp: 1234567890     // Thời gian lưu
   }
 }
 ```
 
-## 用户体验
+## Trải nghiệm người dùng
 
-### 首次使用
-1. 用户正常配置芯片、主题等
-2. 每次修改自动保存到本地存储
-3. 上传的文件同步保存
+### Sử dụng lần đầu
+1. Người dùng cấu hình chip, giao diện bình thường
+2. Mỗi lần sửa đổi tự động lưu vào bộ nhớ cục bộ
+3. Tệp tải lên được lưu đồng bộ
 
-### 刷新页面后
-1. 显示"检测到已保存的配置"提示
-2. 自动恢复到上次的配置状态
-3. 恢复上传的文件和转换数据
-4. 提供"重新开始"选项
+### Sau khi làm mới trang
+1. Hiển thị thông báo "Phát hiện cấu hình đã lưu"
+2. Tự động khôi phục về trạng thái cấu hình lần trước
+3. Khôi phục tệp đã tải lên và dữ liệu đã chuyển đổi
+4. Cung cấp tùy chọn "Bắt đầu lại"
 
-### 重新开始
-1. 点击"重新开始"按钮
-2. 显示详细的确认对话框
-3. 列出将要清除的数据类型
-4. 确认后完整重置到初始状态
+### Bắt đầu lại
+1. Nhấp nút "Bắt đầu lại"
+2. Hiển thị hộp thoại xác nhận chi tiết
+3. Liệt kê các loại dữ liệu sẽ bị xóa
+4. Sau khi xác nhận, đặt lại hoàn toàn về trạng thái ban đầu
 
-## API 参考
+## Tài liệu tham khảo API
 
-### ConfigStorage 主要方法
+### Các phương thức chính của ConfigStorage
 
 ```javascript
-// 保存配置
+// Lưu cấu hình
 await configStorage.saveConfig(config, currentStep, activeThemeTab)
 
-// 加载配置
+// Tải cấu hình
 const data = await configStorage.loadConfig()
 
-// 保存文件
+// Lưu tệp
 await configStorage.saveFile(id, file, type, metadata)
 
-// 加载文件
+// Tải tệp
 const file = await configStorage.loadFile(id)
 
-// 清空所有数据
+// Xóa toàn bộ dữ liệu
 await configStorage.clearAll()
 ```
 
-### StorageHelper 便捷方法
+### Các phương thức tiện lợi của StorageHelper
 
 ```javascript
-// 保存字体文件
+// Lưu tệp font
 await StorageHelper.saveFontFile(file, config)
 
-// 保存表情文件
+// Lưu tệp biểu tượng
 await StorageHelper.saveEmojiFile(emojiName, file, config)
 
-// 保存背景文件
+// Lưu tệp nền
 await StorageHelper.saveBackgroundFile(mode, file, config)
 
-// 删除文件
+// Xóa tệp
 await StorageHelper.deleteFontFile()
 await StorageHelper.deleteEmojiFile(emojiName)
 await StorageHelper.deleteBackgroundFile(mode)
 ```
 
-## 注意事项
+## Lưu ý
 
-### 浏览器兼容性
-- 需要支持 IndexedDB 的现代浏览器
-- 建议使用 Chrome 58+, Firefox 55+, Safari 10.1+
+### Tương thích trình duyệt
+- Cần trình duyệt hiện đại hỗ trợ IndexedDB
+- Khuyến nghị sử dụng Chrome 58+, Firefox 55+, Safari 10.1+
 
-### 存储限制
-- IndexedDB 存储空间受浏览器限制
-- 大文件可能影响存储性能
-- 建议定期清理不需要的数据
+### Giới hạn lưu trữ
+- Không gian lưu trữ IndexedDB bị giới hạn bởi trình duyệt
+- Tệp lớn có thể ảnh hưởng đến hiệu suất lưu trữ
+- Khuyến nghị dọn dẹp định kỳ dữ liệu không cần thiết
 
-### 隐私考虑
-- 数据仅存储在用户本地浏览器
-- 不会上传到服务器
-- 清除浏览器数据会丢失存储的配置
+### Cân nhắc về quyền riêng tư
+- Dữ liệu chỉ lưu trữ cục bộ trong trình duyệt của người dùng
+- Không tải lên máy chủ
+- Xóa dữ liệu trình duyệt sẽ mất cấu hình đã lưu
 
-## 故障排除
+## Khắc phục sự cố
 
-### 存储失败
-- 检查浏览器是否支持 IndexedDB
-- 确认浏览器存储空间充足
-- 检查是否启用了私密浏览模式
+### Lưu trữ thất bại
+- Kiểm tra trình duyệt có hỗ trợ IndexedDB không
+- Xác nhận không gian lưu trữ trình duyệt đủ
+- Kiểm tra có bật chế độ duyệt web riêng tư không
 
-### 配置丢失
-- 清除浏览器数据会导致配置丢失
-- 浏览器升级可能影响存储兼容性
-- 建议重要配置手动备份
+### Mất cấu hình
+- Xóa dữ liệu trình duyệt sẽ dẫn đến mất cấu hình
+- Nâng cấp trình duyệt có thể ảnh hưởng tương thích lưu trữ
+- Khuyến nghị sao lưu thủ công các cấu hình quan trọng
 
-### 性能问题
-- 大量文件存储可能影响性能
-- 定期使用"重新开始"功能清理数据
-- 避免频繁的大文件上传操作
+### Vấn đề hiệu suất
+- Lưu trữ nhiều tệp có thể ảnh hưởng hiệu suất
+- Sử dụng định kỳ chức năng "Bắt đầu lại" để dọn dẹp dữ liệu
+- Tránh thao tác tải lên tệp lớn thường xuyên
